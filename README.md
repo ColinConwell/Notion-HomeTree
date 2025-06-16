@@ -1,21 +1,56 @@
 # Notion-HomeTree
-A Notion integration for generating an automatically populated tree-like directory structure of Notion content.
+A Notion integration for generating **embeddable** tree-like directory structures that can be added directly to Notion pages as blocks.
 
-## Features
+## ✨ What This Is
 
-- 🌳 **Interactive Tree View**: Visualize your Notion page hierarchy as an expandable tree
-- 🔍 **Smart Search**: Filter or highlight content with real-time search
-- 📱 **Responsive Design**: Works on desktop and mobile devices
-- 🚀 **Easy Setup**: Simple configuration with Notion API
+This creates an **embeddable widget** that you can add to any Notion page (just like adding a table, calendar, or other block). The tree automatically displays the hierarchy of child pages and databases.
 
-## MVP Features
+## 🚀 Quick Start
 
-- ✅ Add tree structure intuitively in web interface
-- ✅ Filter tree content with search (hide non-matching items)
-- ✅ Highlight matching content in tree view
-- ✅ Collapsible tree nodes for better navigation
+### 1. Setup Server
 
-## Setup
+Install dependencies:
+```bash
+npm install
+```
+
+Configure Notion API:
+- Create a new integration at https://www.notion.so/my-integrations
+- Copy the integration token
+- Create `.env` file:
+```
+NOTION_API_KEY=your_notion_integration_token_here
+PORT=3000
+```
+
+Start the server:
+```bash
+npm run dev
+```
+
+### 2. Generate Embed URL
+
+1. Visit http://localhost:3000
+2. Enter your Notion page ID or URL
+3. Configure display options (depth, compact view, etc.)
+4. Copy the generated embed URL
+
+### 3. Add to Notion Page
+
+1. In your Notion page, type `/embed`
+2. Paste the embed URL
+3. Press Enter
+4. The tree will appear as an embedded block!
+
+## 🎯 Features
+
+- **📱 Embeddable**: Add as a block directly in Notion pages
+- **🔍 Search**: Filter or highlight tree content in real-time  
+- **⚙️ Configurable**: Control depth, size, search visibility
+- **🎨 Notion-styled**: Matches Notion's design system
+- **📏 Auto-sizing**: Dynamically resizes based on content
+
+## Setup + Installation
 
 1. **Install dependencies:**
    ```bash

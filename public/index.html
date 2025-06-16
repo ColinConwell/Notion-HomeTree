@@ -3,47 +3,108 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Notion HomeTree</title>
+    <title>Notion HomeTree - Configuration</title>
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
     <div class="container">
         <header>
             <h1>📁 Notion HomeTree</h1>
-            <p>Generate tree-like directory structures from your Notion pages</p>
+            <p>Generate embeddable tree views for your Notion pages</p>
         </header>
         
-        <div class="controls">
-            <div class="input-group">
-                <label for="pageId">Notion Page ID:</label>
-                <input type="text" id="pageId" placeholder="Enter Notion page ID or URL">
-                <button id="loadTree">Load Tree</button>
-            </div>
-            
-            <div class="search-group">
-                <label for="search">Search Tree:</label>
-                <input type="text" id="search" placeholder="Search pages and content...">
-                <button id="clearSearch">Clear</button>
+        <div class="config-section">
+            <h2>🔧 Configuration</h2>
+            <div class="controls">
+                <div class="input-group">
+                    <label for="pageId">Notion Page ID or URL:</label>
+                    <input type="text" id="pageId" placeholder="Enter Notion page ID or URL">
+                </div>
+                
+                <div class="options-grid">
+                    <div class="option-group">
+                        <label for="maxDepth">Max Depth:</label>
+                        <select id="maxDepth">
+                            <option value="1">1 level</option>
+                            <option value="2">2 levels</option>
+                            <option value="3" selected>3 levels</option>
+                            <option value="4">4 levels</option>
+                            <option value="5">5 levels</option>
+                        </select>
+                    </div>
+                    
+                    <div class="option-group">
+                        <label>
+                            <input type="checkbox" id="compact" checked> Compact view
+                        </label>
+                    </div>
+                    
+                    <div class="option-group">
+                        <label>
+                            <input type="checkbox" id="showSearch" checked> Show search
+                        </label>
+                    </div>
+                    
+                    <div class="option-group">
+                        <label>
+                            <input type="checkbox" id="autoExpand"> Auto-expand all
+                        </label>
+                    </div>
+                </div>
             </div>
         </div>
         
-        <div class="tree-options">
-            <label>
-                <input type="radio" name="searchMode" value="filter" checked> Filter (hide non-matching)
-            </label>
-            <label>
-                <input type="radio" name="searchMode" value="highlight"> Highlight matching
-            </label>
+        <div class="embed-section">
+            <h2>🎯 Embed URL</h2>
+            <div class="embed-output">
+                <div class="url-display">
+                    <input type="text" id="embedUrl" readonly placeholder="Configure above to generate embed URL">
+                    <button id="copyUrl" class="copy-btn" disabled>Copy</button>
+                </div>
+                
+                <div class="instructions">
+                    <h3>How to add to Notion:</h3>
+                    <ol>
+                        <li>Copy the embed URL above</li>
+                        <li>In your Notion page, type <code>/embed</code></li>
+                        <li>Paste the URL and press Enter</li>
+                        <li>The tree will appear as an embedded block</li>
+                    </ol>
+                </div>
+            </div>
         </div>
         
-        <div id="loading" class="loading hidden">Loading tree...</div>
-        <div id="error" class="error hidden"></div>
+        <div class="preview-section">
+            <h2>👀 Preview</h2>
+            <div class="preview-container">
+                <iframe id="previewFrame" src="" frameborder="0"></iframe>
+                <div id="previewPlaceholder" class="preview-placeholder">
+                    Configure options above to see preview
+                </div>
+            </div>
+        </div>
         
-        <div id="treeContainer" class="tree-container">
-            <div id="tree"></div>
+        <div class="setup-section">
+            <h2>⚙️ Setup Instructions</h2>
+            <div class="setup-steps">
+                <div class="step">
+                    <h3>1. Create Notion Integration</h3>
+                    <p>Go to <a href="https://www.notion.so/my-integrations" target="_blank">notion.so/my-integrations</a> and create a new integration</p>
+                </div>
+                
+                <div class="step">
+                    <h3>2. Share Page with Integration</h3>
+                    <p>In your Notion page, click "Share" → "Invite" → Select your integration</p>
+                </div>
+                
+                <div class="step">
+                    <h3>3. Configure Server</h3>
+                    <p>Set your <code>NOTION_API_KEY</code> in the .env file and restart the server</p>
+                </div>
+            </div>
         </div>
     </div>
     
-    <script src="tree-component.js"></script>
+    <script src="config.js"></script>
 </body>
 </html>

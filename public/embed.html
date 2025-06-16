@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Notion Tree</title>
+    <link rel="stylesheet" href="embed-styles.css">
+</head>
+<body class="embed-body">
+    <div id="embedContainer" class="embed-container">
+        <div id="searchContainer" class="search-container hidden">
+            <input 
+                type="text" 
+                id="searchInput" 
+                placeholder="Search tree..." 
+                class="search-input"
+            >
+            <button id="searchToggle" class="search-toggle" title="Toggle search">🔍</button>
+        </div>
+        
+        <div id="loadingIndicator" class="loading-indicator hidden">
+            <div class="loading-spinner"></div>
+            <span>Loading tree...</span>
+        </div>
+        
+        <div id="errorMessage" class="error-message hidden"></div>
+        
+        <div id="treeContainer" class="tree-container">
+            <div id="tree" class="tree"></div>
+        </div>
+    </div>
+    
+    <script src="embed-component.js"></script>
+</body>
+</html>

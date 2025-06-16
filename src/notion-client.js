@@ -5,10 +5,10 @@ class NotionTreeClient {
     this.notion = new Client({ auth: apiKey });
   }
 
-  async getPageTree(pageId) {
+  async getPageTree(pageId, maxDepth = 3) {
     try {
       const page = await this.notion.pages.retrieve({ page_id: pageId });
-      const children = await this.getPageChildren(pageId);
+      const children = maxDepth > 0 ? await this.getPageChildren(pageId, maxDepth - 1) : [];
       
       return {
         id: pageId,
@@ -22,7 +22,7 @@ class NotionTreeClient {
     }
   }
 
-  async getPageChildren(pageId) {
+  async getPageChildren(pageId, maxDepth = 2) {
     try {
       const response = await this.notion.blocks.children.list({
         block_id: pageId,
@@ -32,9 +32,17 @@ class NotionTreeClient {
       const children = [];
       
       for (const block of response.results) {
-        if (block.type === 'child_page') {
-          const childTree = await this.getPageTree(block.id);
+        if (block.type === 'child_page' && maxDepth > 0) {
+          const childTree = await this.getPageTree(block.id, maxDepth);
           children.push(childTree);
+        } else if (block.type === 'child_page') {
+          // Add page without children when at max depth
+          children.push({
+            id: block.id,
+            title: block.child_page?.title || 'Untitled',
+            type: 'page',
+            children: []
+          });
         } else if (block.type === 'child_database') {
           const database = await this.notion.databases.retrieve({ 
             database_id: block.id 
