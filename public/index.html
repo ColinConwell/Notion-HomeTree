@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Notion HomeTree</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>📁 Notion HomeTree</h1>
+            <p>Generate tree-like directory structures from your Notion pages</p>
+        </header>
+        
+        <div class="controls">
+            <div class="input-group">
+                <label for="pageId">Notion Page ID:</label>
+                <input type="text" id="pageId" placeholder="Enter Notion page ID or URL">
+                <button id="loadTree">Load Tree</button>
+            </div>
+            
+            <div class="search-group">
+                <label for="search">Search Tree:</label>
+                <input type="text" id="search" placeholder="Search pages and content...">
+                <button id="clearSearch">Clear</button>
+            </div>
+        </div>
+        
+        <div class="tree-options">
+            <label>
+                <input type="radio" name="searchMode" value="filter" checked> Filter (hide non-matching)
+            </label>
+            <label>
+                <input type="radio" name="searchMode" value="highlight"> Highlight matching
+            </label>
+        </div>
+        
+        <div id="loading" class="loading hidden">Loading tree...</div>
+        <div id="error" class="error hidden"></div>
+        
+        <div id="treeContainer" class="tree-container">
+            <div id="tree"></div>
+        </div>
+    </div>
+    
+    <script src="tree-component.js"></script>
+</body>
+</html>
