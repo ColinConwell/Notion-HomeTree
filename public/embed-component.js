@@ -47,6 +47,9 @@ class NotionEmbedTree {
     initializeEventListeners() {
         const searchInput = document.getElementById('searchInput');
         const searchToggle = document.getElementById('searchToggle');
+        const refreshButton = document.getElementById('refreshButton');
+        const expandAllButton = document.getElementById('expandAllButton');
+        const collapseAllButton = document.getElementById('collapseAllButton');
 
         if (searchInput) {
             searchInput.addEventListener('input', (e) => {
@@ -71,6 +74,43 @@ class NotionEmbedTree {
                 }
             });
         }
+
+        if (refreshButton) {
+            refreshButton.addEventListener('click', () => {
+                this.refreshTree();
+            });
+        }
+
+        if (expandAllButton) {
+            expandAllButton.addEventListener('click', () => {
+                this.expandAllNodes();
+            });
+        }
+
+        if (collapseAllButton) {
+            collapseAllButton.addEventListener('click', () => {
+                this.collapseAllNodes();
+            });
+        }
+
+        // Keyboard shortcuts
+        document.addEventListener('keydown', (e) => {
+            // Cmd/Ctrl + R for refresh
+            if ((e.metaKey || e.ctrlKey) && e.key === 'r') {
+                e.preventDefault();
+                this.refreshTree();
+            }
+            // Cmd/Ctrl + E for expand all
+            if ((e.metaKey || e.ctrlKey) && e.key === 'e') {
+                e.preventDefault();
+                this.expandAllNodes();
+            }
+            // Cmd/Ctrl + Shift + E for collapse all
+            if ((e.metaKey || e.ctrlKey) && e.shiftKey && e.key === 'E') {
+                e.preventDefault();
+                this.collapseAllNodes();
+            }
+        });
     }
 
     setupAutoResize() {
@@ -124,6 +164,80 @@ class NotionEmbedTree {
             this.showError(`Failed to load tree: ${error.message}`);
         } finally {
             this.showLoading(false);
+        }
+    }
+
+    async refreshTree() {
+        if (!this.config.pageId) {
+            this.showError('No page ID to refresh');
+            return;
+        }
+
+        const refreshButton = document.getElementById('refreshButton');
+        
+        // Store current state
+        const currentSearchTerm = this.searchTerm;
+        const currentCollapsedNodes = new Set(this.collapsedNodes);
+        
+        // Show refresh animation
+        if (refreshButton) {
+            refreshButton.classList.add('refreshing');
+            refreshButton.disabled = true;
+        }
+
+        try {
+            // Add cache busting parameter to force fresh data
+            const cacheBust = Date.now();
+            const response = await fetch(`/api/tree/${this.config.pageId}?maxDepth=${this.config.maxDepth}&_cb=${cacheBust}`);
+            
+            if (!response.ok) {
+                throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+            }
+            
+            this.treeData = await response.json();
+            this.renderTree();
+            
+            // Restore previous state
+            this.searchTerm = currentSearchTerm;
+            const searchInput = document.getElementById('searchInput');
+            if (searchInput) {
+                searchInput.value = currentSearchTerm;
+            }
+            
+            // Restore collapsed state for nodes that still exist
+            this.collapsedNodes = new Set();
+            currentCollapsedNodes.forEach(nodeId => {
+                const nodeExists = document.querySelector(`[data-id="${nodeId}"]`);
+                if (nodeExists) {
+                    this.collapsedNodes.add(nodeId);
+                    nodeExists.classList.add('collapsed');
+                    const toggle = nodeExists.querySelector('.tree-toggle');
+                    if (toggle) {
+                        toggle.textContent = '▶';
+                    }
+                }
+            });
+            
+            this.updateTreeDisplay();
+            
+            // Show brief success feedback
+            if (refreshButton) {
+                const originalTitle = refreshButton.title;
+                refreshButton.title = 'Refreshed!';
+                setTimeout(() => {
+                    refreshButton.title = originalTitle;
+                }, 2000);
+            }
+            
+        } catch (error) {
+            console.error('Error refreshing tree:', error);
+            this.showError(`Failed to refresh tree: ${error.message}`);
+        } finally {
+            // Remove refresh animation
+            if (refreshButton) {
+                refreshButton.classList.remove('refreshing');
+                refreshButton.disabled = false;
+            }
         }
     }
 

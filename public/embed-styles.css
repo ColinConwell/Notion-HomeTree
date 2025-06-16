@@ -76,6 +76,59 @@ html, body {
     background: rgba(55, 53, 47, 0.08);
 }
 
+/* Action Bar */
+.action-bar {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    margin-bottom: 8px;
+    padding: 4px;
+    justify-content: flex-end;
+}
+
+.action-button {
+    background: none;
+    border: none;
+    font-size: 14px;
+    cursor: pointer;
+    padding: 6px 8px;
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.15s ease;
+    color: rgba(55, 53, 47, 0.6);
+    min-width: 28px;
+    height: 28px;
+}
+
+.action-button:hover {
+    background: rgba(55, 53, 47, 0.08);
+    color: rgba(55, 53, 47, 0.8);
+}
+
+.action-button:active {
+    background: rgba(55, 53, 47, 0.12);
+}
+
+.action-button:disabled {
+    opacity: 0.3;
+    cursor: not-allowed;
+}
+
+.action-button:disabled:hover {
+    background: none;
+}
+
+.action-button.refreshing {
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
 /* Loading Indicator */
 .loading-indicator {
     display: flex;
@@ -265,6 +318,18 @@ body.compact .tree-children {
     padding-left: 6px;
 }
 
+body.compact .action-bar {
+    margin-bottom: 6px;
+    padding: 2px;
+}
+
+body.compact .action-button {
+    min-width: 24px;
+    height: 24px;
+    padding: 4px 6px;
+    font-size: 12px;
+}
+
 /* Dark theme support */
 @media (prefers-color-scheme: dark) {
     .embed-body {
@@ -311,5 +376,18 @@ body.compact .tree-children {
     
     .tree-node-title {
         color: rgba(255, 255, 255, 0.9);
+    }
+    
+    .action-button {
+        color: rgba(255, 255, 255, 0.5);
+    }
+    
+    .action-button:hover {
+        background: rgba(255, 255, 255, 0.08);
+        color: rgba(255, 255, 255, 0.8);
+    }
+    
+    .action-button:active {
+        background: rgba(255, 255, 255, 0.12);
     }
 }
