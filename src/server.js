@@ -1,6 +1,7 @@
 const express = require('express');
 const cors = require('cors');
 const path = require('path');
+const NodeCache = require('node-cache');
 require('dotenv').config();
 
 const NotionTreeClient = require('./notion-client');
@@ -25,6 +26,13 @@ app.use((req, res, next) => {
 });
 
 const notionClient = new NotionTreeClient(process.env.NOTION_API_KEY);
+
+// Cache setup - TTL in seconds
+const cache = new NodeCache({ 
+  stdTTL: parseInt(process.env.CACHE_TTL) || 300, // 5 minutes default
+  checkperiod: 60, // Check for expired keys every minute
+  useClones: false // Better performance for JSON objects
+});
 
 // Mock data for testing
 const mockTreeData = {
@@ -100,7 +108,7 @@ app.get('/embed', (req, res) => {
 app.get('/api/tree/:pageId', async (req, res) => {
   try {
     const { pageId } = req.params;
-    const { maxDepth = 3 } = req.query;
+    const { maxDepth = 3, _cb } = req.query; // _cb for cache busting
     
     // Return mock data for testing
     if (pageId === 'mock' || pageId === 'sample') {
@@ -108,7 +116,24 @@ app.get('/api/tree/:pageId', async (req, res) => {
       return;
     }
     
+    const cacheKey = `tree:${pageId}:${maxDepth}`;
+    
+    // Check cache first (unless cache busting is requested)
+    if (!_cb) {
+      const cachedTree = cache.get(cacheKey);
+      if (cachedTree) {
+        res.set('X-Cache', 'HIT');
+        res.json(cachedTree);
+        return;
+      }
+    }
+    
+    // Fetch fresh data
     const tree = await notionClient.getPageTree(pageId, parseInt(maxDepth));
+    
+    // Cache the result
+    cache.set(cacheKey, tree);
+    res.set('X-Cache', 'MISS');
     res.json(tree);
   } catch (error) {
     console.error('API Error:', error);
@@ -136,16 +161,46 @@ app.get('/test', (req, res) => {
   res.sendFile(path.join(__dirname, '../test.html'));
 });
 
+// Cache management endpoints
+app.get('/api/cache/stats', (req, res) => {
+  res.json({
+    keys: cache.keys().length,
+    stats: cache.getStats(),
+    size: cache.keys().length
+  });
+});
+
+app.post('/api/cache/clear/:pageId?', (req, res) => {
+  const { pageId } = req.params;
+  
+  if (pageId) {
+    // Clear specific page cache
+    const keysToDelete = cache.keys().filter(key => key.includes(`tree:${pageId}`));
+    cache.del(keysToDelete);
+    res.json({ cleared: keysToDelete.length, pageId });
+  } else {
+    // Clear all cache
+    const keyCount = cache.keys().length;
+    cache.flushAll();
+    res.json({ cleared: keyCount, all: true });
+  }
+});
+
 // Health check endpoint
 app.get('/health', (req, res) => {
   res.json({ 
     status: 'healthy', 
     timestamp: new Date().toISOString(),
+    cache: {
+      keys: cache.keys().length,
+      stats: cache.getStats()
+    },
     endpoints: {
       config: `http://localhost:${PORT}/`,
       test: `http://localhost:${PORT}/test`,
       embed: `http://localhost:${PORT}/embed?pageId=mock`,
-      api: `http://localhost:${PORT}/api/tree/mock`
+      api: `http://localhost:${PORT}/api/tree/mock`,
+      cacheStats: `http://localhost:${PORT}/api/cache/stats`
     }
   });
 });

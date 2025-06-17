@@ -4,6 +4,7 @@ class NotionEmbedTree {
         this.searchTerm = '';
         this.collapsedNodes = new Set();
         this.config = this.parseUrlParams();
+        this.autoRefreshInterval = null;
         
         this.init();
     }
@@ -16,7 +17,8 @@ class NotionEmbedTree {
             compact: params.get('compact') === 'true',
             showSearch: params.get('showSearch') !== 'false',
             maxDepth: parseInt(params.get('maxDepth')) || 3,
-            autoExpand: params.get('autoExpand') === 'true'
+            autoExpand: params.get('autoExpand') === 'true',
+            autoRefresh: parseInt(params.get('autoRefresh')) || 0 // Auto-refresh rate in seconds (0 = disabled)
         };
     }
 
@@ -42,6 +44,9 @@ class NotionEmbedTree {
 
         // Auto-resize iframe
         this.setupAutoResize();
+        
+        // Setup auto-refresh if enabled
+        this.setupAutoRefresh();
     }
 
     initializeEventListeners() {
@@ -278,7 +283,13 @@ class NotionEmbedTree {
             return;
         }
 
-        treeContainer.innerHTML = this.renderNode(this.treeData);
+        // Use DocumentFragment for better performance
+        const fragment = document.createDocumentFragment();
+        fragment.appendChild(this.createNodeElement(this.treeData));
+        
+        treeContainer.innerHTML = '';
+        treeContainer.appendChild(fragment);
+        
         this.updateTreeDisplay();
         this.notifyParentOfResize();
     }
@@ -299,7 +310,7 @@ class NotionEmbedTree {
                         ${toggleIcon}
                     </button>
                     <span class="tree-node-icon">${icon}</span>
-                    <span class="tree-node-title">${this.escapeHtml(node.title)}</span>
+                    <a href="${this.getNotionUrl(node.id)}" target="_blank" class="tree-node-title tree-node-link">${this.escapeHtml(node.title)}</a>
                 </div>
         `;
 
@@ -315,12 +326,67 @@ class NotionEmbedTree {
         return html;
     }
 
+    createNodeElement(node, level = 0) {
+        const hasChildren = node.children && node.children.length > 0;
+        const isCollapsed = this.collapsedNodes.has(node.id);
+        
+        // Create elements
+        const nodeDiv = document.createElement('div');
+        nodeDiv.className = `tree-node ${isCollapsed ? 'collapsed' : ''}`;
+        nodeDiv.dataset.id = node.id;
+
+        const contentDiv = document.createElement('div');
+        contentDiv.className = 'tree-node-content';
+
+        const toggleButton = document.createElement('button');
+        toggleButton.className = `tree-toggle ${!hasChildren ? 'empty' : ''}`;
+        toggleButton.dataset.nodeId = node.id;
+        toggleButton.textContent = hasChildren ? (isCollapsed ? '▶' : '▼') : '';
+        if (!hasChildren) toggleButton.disabled = true;
+
+        const iconSpan = document.createElement('span');
+        iconSpan.className = 'tree-node-icon';
+        iconSpan.textContent = this.getNodeIcon(node);
+
+        const titleLink = document.createElement('a');
+        titleLink.href = this.getNotionUrl(node.id);
+        titleLink.target = '_blank';
+        titleLink.className = 'tree-node-title tree-node-link';
+        titleLink.textContent = node.title;
+
+        // Assemble content
+        contentDiv.appendChild(toggleButton);
+        contentDiv.appendChild(iconSpan);
+        contentDiv.appendChild(titleLink);
+        nodeDiv.appendChild(contentDiv);
+
+        // Add children if they exist
+        if (hasChildren) {
+            const childrenDiv = document.createElement('div');
+            childrenDiv.className = 'tree-children';
+            
+            for (const child of node.children) {
+                childrenDiv.appendChild(this.createNodeElement(child, level + 1));
+            }
+            
+            nodeDiv.appendChild(childrenDiv);
+        }
+
+        return nodeDiv;
+    }
+
     getNodeIcon(node) {
         switch (node.type) {
             case 'database': return '🗃️';
             case 'page': return '📄';
             default: return '📄';
         }
+    }
+
+    getNotionUrl(pageId) {
+        // Format page ID for Notion URL (add hyphens)
+        const formattedId = pageId.replace(/(.{8})(.{4})(.{4})(.{4})(.{12})/, '$1-$2-$3-$4-$5');
+        return `https://www.notion.so/${formattedId}`;
     }
 
     updateTreeDisplay() {
@@ -440,6 +506,32 @@ class NotionEmbedTree {
 
     escapeRegex(string) {
         return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    }
+
+    setupAutoRefresh() {
+        // Clear any existing interval
+        if (this.autoRefreshInterval) {
+            clearInterval(this.autoRefreshInterval);
+            this.autoRefreshInterval = null;
+        }
+
+        // Setup new interval if auto-refresh is enabled
+        if (this.config.autoRefresh > 0) {
+            const refreshMs = this.config.autoRefresh * 1000;
+            this.autoRefreshInterval = setInterval(() => {
+                this.refreshTree();
+            }, refreshMs);
+            
+            console.log(`Auto-refresh enabled: every ${this.config.autoRefresh} seconds`);
+        }
+    }
+
+    destroy() {
+        // Clean up intervals when component is destroyed
+        if (this.autoRefreshInterval) {
+            clearInterval(this.autoRefreshInterval);
+            this.autoRefreshInterval = null;
+        }
     }
 }
 

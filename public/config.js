@@ -5,7 +5,7 @@ class NotionTreeConfig {
     }
 
     initializeEventListeners() {
-        const inputs = ['pageId', 'maxDepth', 'compact', 'showSearch', 'autoExpand'];
+        const inputs = ['pageId', 'maxDepth', 'compact', 'showSearch', 'autoExpand', 'autoRefresh'];
         
         inputs.forEach(id => {
             const element = document.getElementById(id);
@@ -62,6 +62,7 @@ class NotionTreeConfig {
         const compact = document.getElementById('compact').checked;
         const showSearch = document.getElementById('showSearch').checked;
         const autoExpand = document.getElementById('autoExpand').checked;
+        const autoRefresh = parseInt(document.getElementById('autoRefresh').value) || 0;
         
         // Only add non-default values to keep URL clean
         if (maxDepth !== '3') {
@@ -75,6 +76,9 @@ class NotionTreeConfig {
         }
         if (autoExpand) {
             params.set('autoExpand', 'true');
+        }
+        if (autoRefresh > 0) {
+            params.set('autoRefresh', autoRefresh.toString());
         }
 
         const baseUrl = window.location.origin;
