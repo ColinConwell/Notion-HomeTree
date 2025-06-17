@@ -42,14 +42,6 @@ npm run dev
 3. Press Enter
 4. The tree will appear as an embedded block!
 
-## 🎯 Features
-
-- **📱 Embeddable**: Add as a block directly in Notion pages
-- **🔍 Search**: Filter or highlight tree content in real-time  
-- **⚙️ Configurable**: Control depth, size, search visibility
-- **🎨 Notion-styled**: Matches Notion's design system
-- **📏 Auto-sizing**: Dynamically resizes based on content
-
 ## Setup + Installation
 
 1. **Install dependencies:**
@@ -92,6 +84,31 @@ npm run dev
 - `GET /api/tree/:pageId` - Fetch tree structure for a page
 - `GET /api/search?q=query` - Search pages (optional)
 
+## 🧪 Testing
+
+### Quick Test (No Notion API Required)
+1. Start server: `npm run dev`
+2. Visit: http://localhost:3000/test
+3. Click "Load Mock Data" to see the tree in action
+
+### Test Pages Available:
+- **Config UI**: http://localhost:3000
+- **Test Page**: http://localhost:3000/test (comprehensive testing interface)
+- **Sample Embed**: http://localhost:3000/embed?pageId=mock
+- **Health Check**: http://localhost:3000/health
+
+### Testing Features:
+- Mock data endpoint for testing without Notion API
+- Responsive design testing at different sizes
+- Direct API endpoint testing
+- iframe embedding validation
+- Refresh and search functionality testing
+
+### With Real Notion Data:
+1. Configure `.env` with your Notion API key
+2. Share target pages with your integration
+3. Use real page IDs in the config or test page
+
 ## File Structure
 
 ```
@@ -100,7 +117,13 @@ src/
 └── server.js          # Express server
 
 public/
-├── index.html         # Main interface
-├── styles.css         # Styling
-└── tree-component.js  # Tree functionality
+├── index.html         # Main config interface
+├── embed.html         # Embeddable widget
+├── styles.css         # Config page styling
+├── embed-styles.css   # Widget styling
+├── config.js          # Configuration logic
+└── embed-component.js # Tree widget functionality
+
+test.html              # Testing interface
+test-setup.md          # Testing documentation
 ```

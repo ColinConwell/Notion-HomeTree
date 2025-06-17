@@ -26,6 +26,65 @@ app.use((req, res, next) => {
 
 const notionClient = new NotionTreeClient(process.env.NOTION_API_KEY);
 
+// Mock data for testing
+const mockTreeData = {
+  id: 'mock-page-id',
+  title: 'Sample Home Page',
+  type: 'page',
+  children: [
+    {
+      id: 'mock-child-1',
+      title: 'Projects',
+      type: 'page',
+      children: [
+        {
+          id: 'mock-grandchild-1',
+          title: 'Web Development',
+          type: 'page',
+          children: [
+            { id: 'mock-ggchild-1', title: 'React Components', type: 'page', children: [] },
+            { id: 'mock-ggchild-2', title: 'API Integration', type: 'page', children: [] }
+          ]
+        },
+        {
+          id: 'mock-grandchild-2',
+          title: 'Mobile Apps',
+          type: 'page',
+          children: [
+            { id: 'mock-ggchild-3', title: 'iOS Development', type: 'page', children: [] },
+            { id: 'mock-ggchild-4', title: 'Flutter Apps', type: 'page', children: [] }
+          ]
+        }
+      ]
+    },
+    {
+      id: 'mock-child-2',
+      title: 'Team Database',
+      type: 'database',
+      children: []
+    },
+    {
+      id: 'mock-child-3',
+      title: 'Documentation',
+      type: 'page',
+      children: [
+        { id: 'mock-grandchild-3', title: 'Setup Guide', type: 'page', children: [] },
+        { id: 'mock-grandchild-4', title: 'API Reference', type: 'page', children: [] },
+        { id: 'mock-grandchild-5', title: 'Troubleshooting', type: 'page', children: [] }
+      ]
+    },
+    {
+      id: 'mock-child-4',
+      title: 'Resources',
+      type: 'page',
+      children: [
+        { id: 'mock-grandchild-6', title: 'Links & Bookmarks', type: 'page', children: [] },
+        { id: 'mock-grandchild-7', title: 'Templates', type: 'database', children: [] }
+      ]
+    }
+  ]
+};
+
 // Embeddable widget endpoint
 app.get('/embed', (req, res) => {
   const { pageId, theme = 'light', compact = 'false' } = req.query;
@@ -42,6 +101,13 @@ app.get('/api/tree/:pageId', async (req, res) => {
   try {
     const { pageId } = req.params;
     const { maxDepth = 3 } = req.query;
+    
+    // Return mock data for testing
+    if (pageId === 'mock' || pageId === 'sample') {
+      res.json(mockTreeData);
+      return;
+    }
+    
     const tree = await notionClient.getPageTree(pageId, parseInt(maxDepth));
     res.json(tree);
   } catch (error) {
@@ -65,13 +131,34 @@ app.get('/api/search', async (req, res) => {
   }
 });
 
+// Test endpoint
+app.get('/test', (req, res) => {
+  res.sendFile(path.join(__dirname, '../test.html'));
+});
+
+// Health check endpoint
+app.get('/health', (req, res) => {
+  res.json({ 
+    status: 'healthy', 
+    timestamp: new Date().toISOString(),
+    endpoints: {
+      config: `http://localhost:${PORT}/`,
+      test: `http://localhost:${PORT}/test`,
+      embed: `http://localhost:${PORT}/embed?pageId=mock`,
+      api: `http://localhost:${PORT}/api/tree/mock`
+    }
+  });
+});
+
 // Main configuration page
 app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, '../public/index.html'));
 });
 
 app.listen(PORT, () => {
-  console.log(`Notion HomeTree server running on port ${PORT}`);
-  console.log(`Embed URL: http://localhost:${PORT}/embed?pageId=YOUR_PAGE_ID`);
-  console.log(`Config URL: http://localhost:${PORT}`);
+  console.log(`🚀 Notion HomeTree server running on port ${PORT}`);
+  console.log(`📝 Config page: http://localhost:${PORT}`);
+  console.log(`🧪 Test page: http://localhost:${PORT}/test`);
+  console.log(`🔗 Sample embed: http://localhost:${PORT}/embed?pageId=mock`);
+  console.log(`💡 Health check: http://localhost:${PORT}/health`);
 });
