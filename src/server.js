@@ -110,31 +110,81 @@ app.get('/api/tree/:pageId', async (req, res) => {
     const { pageId } = req.params;
     const { maxDepth = 3, _cb } = req.query; // _cb for cache busting
     
+    // Handle multiple page IDs (comma-separated)
+    const pageIds = pageId.includes(',') ? pageId.split(',') : [pageId];
+    
     // Return mock data for testing
-    if (pageId === 'mock' || pageId === 'sample') {
-      res.json(mockTreeData);
+    if (pageIds.includes('mock') || pageIds.includes('sample')) {
+      if (pageIds.length === 1) {
+        res.json(mockTreeData);
+        return;
+      }
+      // For multiple roots including mock, create a virtual root
+      const multiRootData = {
+        id: 'multi-root',
+        title: 'Multiple Pages',
+        type: 'virtual',
+        children: [mockTreeData]
+      };
+      res.json(multiRootData);
       return;
     }
     
-    const cacheKey = `tree:${pageId}:${maxDepth}`;
-    
-    // Check cache first (unless cache busting is requested)
-    if (!_cb) {
-      const cachedTree = cache.get(cacheKey);
-      if (cachedTree) {
-        res.set('X-Cache', 'HIT');
-        res.json(cachedTree);
-        return;
+    if (pageIds.length === 1) {
+      // Single page - existing logic
+      const cacheKey = `tree:${pageId}:${maxDepth}`;
+      
+      // Check cache first (unless cache busting is requested)
+      if (!_cb) {
+        const cachedTree = cache.get(cacheKey);
+        if (cachedTree) {
+          res.set('X-Cache', 'HIT');
+          res.json(cachedTree);
+          return;
+        }
       }
+      
+      // Fetch fresh data
+      const tree = await notionClient.getPageTree(pageId, parseInt(maxDepth));
+      
+      // Cache the result
+      cache.set(cacheKey, tree);
+      res.set('X-Cache', 'MISS');
+      res.json(tree);
+    } else {
+      // Multiple pages - create virtual root
+      const cacheKey = `multi-tree:${pageIds.join(',')}:${maxDepth}`;
+      
+      // Check cache first (unless cache busting is requested)
+      if (!_cb) {
+        const cachedTree = cache.get(cacheKey);
+        if (cachedTree) {
+          res.set('X-Cache', 'HIT');
+          res.json(cachedTree);
+          return;
+        }
+      }
+      
+      // Fetch all trees in parallel
+      const treePromises = pageIds.map(id => 
+        notionClient.getPageTree(id.trim(), parseInt(maxDepth))
+      );
+      
+      const trees = await Promise.all(treePromises);
+      
+      // Create virtual root containing all trees
+      const multiTree = {
+        id: 'multi-root',
+        title: 'Multiple Pages',
+        type: 'virtual',
+        children: trees
+      };
+      
+      // Cache the result
+      cache.set(cacheKey, multiTree);
+      res.set('X-Cache', 'MISS');
+      res.json(multiTree);
     }
-    
-    // Fetch fresh data
-    const tree = await notionClient.getPageTree(pageId, parseInt(maxDepth));
-    
-    // Cache the result
-    cache.set(cacheKey, tree);
-    res.set('X-Cache', 'MISS');
-    res.json(tree);
   } catch (error) {
     console.error('API Error:', error);
     res.status(500).json({ error: 'Failed to fetch page tree' });

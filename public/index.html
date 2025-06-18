@@ -19,6 +19,18 @@
                 <div class="input-group">
                     <label for="pageId">Notion Page ID or URL:</label>
                     <input type="text" id="pageId" placeholder="Enter Notion page ID or URL">
+                    <small style="color: #666; margin-top: 4px; display: block;">For single page trees</small>
+                </div>
+                
+                <div class="input-group">
+                    <label for="multiPageIds">Multiple Page URLs/IDs (one per line):</label>
+                    <textarea 
+                        id="multiPageIds" 
+                        placeholder="https://www.notion.so/page1&#10;https://www.notion.so/page2&#10;page-id-3"
+                        rows="4"
+                        style="width: 100%; padding: 8px; margin-top: 4px; border: 1px solid #ddd; border-radius: 4px; font-family: inherit; resize: vertical;"
+                    ></textarea>
+                    <small style="color: #666; margin-top: 4px; display: block;">For multi-root trees (overrides single page above)</small>
                 </div>
                 
                 <div class="options-grid">

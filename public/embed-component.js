@@ -13,6 +13,7 @@ class NotionEmbedTree {
         const params = new URLSearchParams(window.location.search);
         return {
             pageId: params.get('pageId'),
+            pageIds: params.get('pageIds'), // Support multiple page IDs
             theme: params.get('theme') || 'light',
             compact: params.get('compact') === 'true',
             showSearch: params.get('showSearch') !== 'false',
@@ -36,8 +37,9 @@ class NotionEmbedTree {
 
         this.initializeEventListeners();
         
-        if (this.config.pageId) {
-            this.loadTree(this.config.pageId);
+        const effectivePageId = this.config.pageIds || this.config.pageId;
+        if (effectivePageId) {
+            this.loadTree(effectivePageId);
         } else {
             this.showError('No page ID provided');
         }
@@ -173,7 +175,8 @@ class NotionEmbedTree {
     }
 
     async refreshTree() {
-        if (!this.config.pageId) {
+        const effectivePageId = this.config.pageIds || this.config.pageId;
+        if (!effectivePageId) {
             this.showError('No page ID to refresh');
             return;
         }
@@ -193,7 +196,7 @@ class NotionEmbedTree {
         try {
             // Add cache busting parameter to force fresh data
             const cacheBust = Date.now();
-            const response = await fetch(`/api/tree/${this.config.pageId}?maxDepth=${this.config.maxDepth}&_cb=${cacheBust}`);
+            const response = await fetch(`/api/tree/${effectivePageId}?maxDepth=${this.config.maxDepth}&_cb=${cacheBust}`);
             
             if (!response.ok) {
                 throw new Error(`HTTP ${response.status}: ${response.statusText}`);
@@ -379,11 +382,16 @@ class NotionEmbedTree {
         switch (node.type) {
             case 'database': return '🗃️';
             case 'page': return '📄';
+            case 'virtual': return '📁'; // For multi-root virtual containers
             default: return '📄';
         }
     }
 
     getNotionUrl(pageId) {
+        // Don't create URLs for virtual nodes
+        if (pageId === 'multi-root' || !pageId || pageId.includes('virtual')) {
+            return '#';
+        }
         // Format page ID for Notion URL (add hyphens)
         const formattedId = pageId.replace(/(.{8})(.{4})(.{4})(.{4})(.{12})/, '$1-$2-$3-$4-$5');
         return `https://www.notion.so/${formattedId}`;

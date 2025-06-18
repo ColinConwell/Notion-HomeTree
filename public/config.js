@@ -5,7 +5,7 @@ class NotionTreeConfig {
     }
 
     initializeEventListeners() {
-        const inputs = ['pageId', 'maxDepth', 'compact', 'showSearch', 'autoExpand', 'autoRefresh'];
+        const inputs = ['pageId', 'multiPageIds', 'maxDepth', 'compact', 'showSearch', 'autoExpand', 'autoRefresh'];
         
         inputs.forEach(id => {
             const element = document.getElementById(id);
@@ -56,15 +56,42 @@ class NotionTreeConfig {
 
     updateEmbedUrl() {
         const pageIdInput = document.getElementById('pageId').value.trim();
-        const pageId = this.extractPageId(pageIdInput);
+        const multiPageIdsInput = document.getElementById('multiPageIds').value.trim();
         
-        if (!pageId) {
-            this.clearEmbedUrl();
-            return;
+        let effectivePageIds;
+        
+        // Check if multiple page IDs are provided
+        if (multiPageIdsInput) {
+            const lines = multiPageIdsInput.split('\n')
+                .map(line => line.trim())
+                .filter(line => line.length > 0);
+            
+            const extractedIds = lines
+                .map(line => this.extractPageId(line))
+                .filter(id => id !== null);
+            
+            if (extractedIds.length === 0) {
+                this.clearEmbedUrl();
+                return;
+            }
+            
+            effectivePageIds = extractedIds.join(',');
+        } else {
+            // Single page ID
+            const pageId = this.extractPageId(pageIdInput);
+            if (!pageId) {
+                this.clearEmbedUrl();
+                return;
+            }
+            effectivePageIds = pageId;
         }
 
         const params = new URLSearchParams();
-        params.set('pageId', pageId);
+        if (multiPageIdsInput) {
+            params.set('pageIds', effectivePageIds);
+        } else {
+            params.set('pageId', effectivePageIds);
+        }
         
         // Get configuration values
         const maxDepth = document.getElementById('maxDepth').value;
