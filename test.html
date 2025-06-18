@@ -134,6 +134,48 @@
         </div>
         
         <div class="test-section">
+            <h2>🔄 Dynamic Configuration Tests</h2>
+            <div class="test-info">
+                <strong>New Feature:</strong> Test the dynamic page addition functionality<br>
+                • Empty state with + button<br>
+                • Modal for adding pages<br>
+                • Default configuration loading
+            </div>
+            
+            <div class="grid">
+                <div>
+                    <h3>Empty State Test</h3>
+                    <p>Test embed with no initial pages (should show + button)</p>
+                    <div class="iframe-container">
+                        <iframe src="http://localhost:3000/embed?compact=true&showSearch=true" 
+                                height="200"></iframe>
+                    </div>
+                </div>
+                
+                <div>
+                    <h3>Default Config Test</h3>
+                    <p>Test loading defaults from server config</p>
+                    <div>
+                        <button class="btn" onclick="testDefaults()">Test Default Config API</button>
+                        <button class="btn" onclick="loadDefaultEmbed()">Load Default Embed</button>
+                    </div>
+                    <div id="defaultEmbedContainer" class="iframe-container" style="display: none;">
+                        <iframe id="defaultEmbed" height="250"></iframe>
+                    </div>
+                </div>
+            </div>
+            
+            <div style="margin-top: 20px;">
+                <h3>Multi-Page Dynamic Test</h3>
+                <p>Test adding multiple pages dynamically:</p>
+                <button class="btn" onclick="loadMultiPageEmbed()">Load Multi-Page Embed</button>
+                <div id="multiPageContainer" class="iframe-container" style="display: none;">
+                    <iframe id="multiPageEmbed" height="400"></iframe>
+                </div>
+            </div>
+        </div>
+
+        <div class="test-section">
             <h2>🔗 Direct API Testing</h2>
             <p>Test the API endpoints directly:</p>
             
@@ -255,6 +297,39 @@
             }
         }
         
+        async function testDefaults() {
+            const responseEl = document.getElementById('apiResponse');
+            
+            try {
+                const response = await fetch('http://localhost:3000/api/config/defaults');
+                const data = await response.json();
+                
+                responseEl.textContent = 'Default Config:\n' + JSON.stringify(data, null, 2);
+                responseEl.style.display = 'block';
+            } catch (error) {
+                responseEl.textContent = `Config API Error: ${error.message}`;
+                responseEl.style.display = 'block';
+            }
+        }
+        
+        function loadDefaultEmbed() {
+            const container = document.getElementById('defaultEmbedContainer');
+            const iframe = document.getElementById('defaultEmbed');
+            
+            // Load embed without pageId to test default loading
+            iframe.src = 'http://localhost:3000/embed?compact=true&showSearch=true';
+            container.style.display = 'block';
+        }
+        
+        function loadMultiPageEmbed() {
+            const container = document.getElementById('multiPageContainer');
+            const iframe = document.getElementById('multiPageEmbed');
+            
+            // Load embed with multiple mock pages
+            iframe.src = 'http://localhost:3000/embed?pageIds=mock,sample&compact=false&showSearch=true';
+            container.style.display = 'block';
+        }
+
         // Auto-test server on load
         window.addEventListener('load', () => {
             setTimeout(testHealth, 1000);
