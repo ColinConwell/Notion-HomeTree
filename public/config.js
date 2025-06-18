@@ -22,8 +22,17 @@ class NotionTreeConfig {
     extractPageId(input) {
         if (!input) return null;
         
-        // Extract from full Notion URL
-        const urlPattern = /notion\.so\/([a-f0-9]{32})/i;
+        // Extract from full Notion URL with workspace prefix and query params
+        // Matches: notion.so/workspace/Page-Title-199d606e3bdf8009975adb93ae6a52a7?source=copy_link
+        const urlPatternWithWorkspace = /notion\.so\/[^\/]+\/[^\/]*-([a-f0-9]{32})(?:\?.*)?$/i;
+        const workspaceMatch = input.match(urlPatternWithWorkspace);
+        if (workspaceMatch) {
+            return workspaceMatch[1];
+        }
+        
+        // Extract from simple Notion URL
+        // Matches: notion.so/199d606e3bdf8009975adb93ae6a52a7
+        const urlPattern = /notion\.so\/([a-f0-9]{32})(?:\?.*)?$/i;
         const match = input.match(urlPattern);
         if (match) {
             return match[1];
@@ -42,7 +51,7 @@ class NotionTreeConfig {
             return cleanId;
         }
         
-        return input.trim();
+        return null; // Return null instead of input.trim() for invalid IDs
     }
 
     updateEmbedUrl() {
