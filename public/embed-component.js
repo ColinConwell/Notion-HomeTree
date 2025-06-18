@@ -5,6 +5,7 @@ class NotionEmbedTree {
         this.collapsedNodes = new Set();
         this.config = this.parseUrlParams();
         this.autoRefreshInterval = null;
+        this.currentPageIds = [];
         
         this.init();
     }
@@ -23,7 +24,7 @@ class NotionEmbedTree {
         };
     }
 
-    init() {
+    async init() {
         // Apply theme and size classes
         if (this.config.compact) {
             document.body.classList.add('compact');
@@ -37,11 +38,14 @@ class NotionEmbedTree {
 
         this.initializeEventListeners();
         
-        const effectivePageId = this.config.pageIds || this.config.pageId;
-        if (effectivePageId) {
-            this.loadTree(effectivePageId);
+        // Load page IDs from URL params or defaults
+        await this.loadPageIds();
+        
+        if (this.currentPageIds.length > 0) {
+            const pageIdString = this.currentPageIds.join(',');
+            this.loadTree(pageIdString);
         } else {
-            this.showError('No page ID provided');
+            this.showEmptyState();
         }
 
         // Auto-resize iframe
@@ -49,6 +53,194 @@ class NotionEmbedTree {
         
         // Setup auto-refresh if enabled
         this.setupAutoRefresh();
+    }
+
+    async loadPageIds() {
+        // First check URL parameters
+        if (this.config.pageIds) {
+            this.currentPageIds = this.config.pageIds.split(',').map(id => id.trim()).filter(id => id);
+            return;
+        }
+        
+        if (this.config.pageId) {
+            this.currentPageIds = [this.config.pageId];
+            return;
+        }
+        
+        // If no URL params, try to load defaults from server
+        try {
+            const response = await fetch('/api/config/defaults');
+            if (response.ok) {
+                const defaults = await response.json();
+                this.currentPageIds = defaults.pageIds || [];
+            }
+        } catch (error) {
+            console.warn('Could not load default page IDs:', error);
+            this.currentPageIds = [];
+        }
+    }
+
+    showEmptyState() {
+        const treeContainer = document.getElementById('tree');
+        treeContainer.innerHTML = `
+            <div class="empty-state">
+                <div class="empty-state-icon">📁</div>
+                <div class="empty-state-text">No pages configured</div>
+                <div class="empty-state-subtitle">Click the + button below to add pages</div>
+            </div>
+        `;
+        this.addPageButton();
+        this.notifyParentOfResize();
+    }
+
+    addPageButton() {
+        // Check if button already exists
+        if (document.getElementById('addPageButton')) return;
+        
+        const container = document.getElementById('embedContainer');
+        const buttonContainer = document.createElement('div');
+        buttonContainer.className = 'add-page-container';
+        buttonContainer.innerHTML = `
+            <button id="addPageButton" class="add-page-button" title="Add new page to tree">
+                <span class="add-page-icon">+</span>
+                <span class="add-page-text">Add Page</span>
+            </button>
+        `;
+        
+        container.appendChild(buttonContainer);
+        
+        // Add event listener
+        document.getElementById('addPageButton').addEventListener('click', () => {
+            this.showAddPageModal();
+        });
+    }
+
+    showAddPageModal() {
+        // Create modal overlay
+        const modal = document.createElement('div');
+        modal.className = 'add-page-modal';
+        modal.innerHTML = `
+            <div class="add-page-modal-content">
+                <div class="add-page-modal-header">
+                    <h3>Add Page to Tree</h3>
+                    <button class="modal-close">&times;</button>
+                </div>
+                <div class="add-page-modal-body">
+                    <label for="pageUrlInput">Paste Notion page URL or ID:</label>
+                    <textarea id="pageUrlInput" placeholder="https://www.notion.so/...&#10;or paste multiple URLs (one per line)" rows="3"></textarea>
+                    <div class="add-page-modal-footer">
+                        <button id="cancelAddPage" class="modal-button modal-button-secondary">Cancel</button>
+                        <button id="confirmAddPage" class="modal-button modal-button-primary">Add Page(s)</button>
+                    </div>
+                </div>
+            </div>
+        `;
+        
+        document.body.appendChild(modal);
+        
+        // Focus the input
+        setTimeout(() => {
+            document.getElementById('pageUrlInput').focus();
+        }, 100);
+        
+        // Add event listeners
+        document.getElementById('cancelAddPage').addEventListener('click', () => {
+            this.closeAddPageModal();
+        });
+        
+        document.getElementById('confirmAddPage').addEventListener('click', () => {
+            this.addPagesFromInput();
+        });
+        
+        document.querySelector('.modal-close').addEventListener('click', () => {
+            this.closeAddPageModal();
+        });
+        
+        // Close on escape
+        document.addEventListener('keydown', this.handleModalKeydown.bind(this));
+        
+        // Close on overlay click
+        modal.addEventListener('click', (e) => {
+            if (e.target === modal) {
+                this.closeAddPageModal();
+            }
+        });
+    }
+
+    handleModalKeydown(e) {
+        if (e.key === 'Escape') {
+            this.closeAddPageModal();
+        }
+    }
+
+    closeAddPageModal() {
+        const modal = document.querySelector('.add-page-modal');
+        if (modal) {
+            modal.remove();
+        }
+        document.removeEventListener('keydown', this.handleModalKeydown.bind(this));
+    }
+
+    extractPageId(input) {
+        if (!input) return null;
+        
+        // Extract from full Notion URL with workspace prefix and query params
+        const urlPatternWithWorkspace = /notion\.so\/[^\/]+\/[^\/]*-([a-f0-9]{32})(?:\?.*)?$/i;
+        const workspaceMatch = input.match(urlPatternWithWorkspace);
+        if (workspaceMatch) {
+            return workspaceMatch[1];
+        }
+        
+        // Extract from simple notion.so URL
+        const urlPattern = /notion\.so\/([a-f0-9]{32})(?:\?.*)?$/i;
+        const urlMatch = input.match(urlPattern);
+        if (urlMatch) {
+            return urlMatch[1];
+        }
+        
+        // Extract from URL with title and ID
+        const titlePattern = /notion\.so\/[^\/]*-([a-f0-9]{32})(?:\?.*)?$/i;
+        const titleMatch = input.match(titlePattern);
+        if (titleMatch) {
+            return titleMatch[1];
+        }
+        
+        // Check if it's already a clean page ID (32 hex chars)
+        if (/^[a-f0-9]{32}$/i.test(input.trim())) {
+            return input.trim();
+        }
+        
+        return null;
+    }
+
+    async addPagesFromInput() {
+        const input = document.getElementById('pageUrlInput').value.trim();
+        if (!input) return;
+        
+        const lines = input.split('\n').map(line => line.trim()).filter(line => line);
+        const newPageIds = [];
+        
+        for (const line of lines) {
+            const pageId = this.extractPageId(line);
+            if (pageId && !this.currentPageIds.includes(pageId)) {
+                newPageIds.push(pageId);
+            }
+        }
+        
+        if (newPageIds.length === 0) {
+            alert('No valid page IDs found. Please check your URLs.');
+            return;
+        }
+        
+        // Add to current page IDs
+        this.currentPageIds.push(...newPageIds);
+        
+        // Close modal
+        this.closeAddPageModal();
+        
+        // Reload tree with new pages
+        const pageIdString = this.currentPageIds.join(',');
+        await this.loadTree(pageIdString);
     }
 
     initializeEventListeners() {
@@ -276,13 +468,7 @@ class NotionEmbedTree {
         const treeContainer = document.getElementById('tree');
         
         if (!this.treeData) {
-            treeContainer.innerHTML = `
-                <div class="empty-state">
-                    <div class="empty-state-icon">📁</div>
-                    <div class="empty-state-text">No tree data available</div>
-                </div>
-            `;
-            this.notifyParentOfResize();
+            this.showEmptyState();
             return;
         }
 
@@ -292,6 +478,9 @@ class NotionEmbedTree {
         
         treeContainer.innerHTML = '';
         treeContainer.appendChild(fragment);
+        
+        // Add the + button below the tree
+        this.addPageButton();
         
         this.updateTreeDisplay();
         this.notifyParentOfResize();

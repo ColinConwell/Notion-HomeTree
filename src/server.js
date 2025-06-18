@@ -95,13 +95,25 @@ const mockTreeData = {
 
 // Embeddable widget endpoint
 app.get('/embed', (req, res) => {
-  const { pageId, theme = 'light', compact = 'false' } = req.query;
+  const { pageId, pageIds, theme = 'light', compact = 'false' } = req.query;
   
-  if (!pageId) {
-    return res.status(400).send('Page ID is required');
+  // Check for default page IDs if none provided
+  const defaultPageIds = process.env.DEFAULT_PAGE_IDS;
+  
+  if (!pageId && !pageIds && !defaultPageIds) {
+    return res.status(400).send('Page ID is required or set DEFAULT_PAGE_IDS in .env');
   }
   
   res.sendFile(path.join(__dirname, '../public/embed.html'));
+});
+
+// Get default configuration
+app.get('/api/config/defaults', (req, res) => {
+  res.json({
+    pageIds: process.env.DEFAULT_PAGE_IDS ? process.env.DEFAULT_PAGE_IDS.split(',').map(id => id.trim()) : [],
+    autoRefresh: parseInt(process.env.AUTO_REFRESH_DEFAULT) || 0,
+    maxDepth: parseInt(process.env.MAX_DEPTH_DEFAULT) || 3
+  });
 });
 
 // API endpoints

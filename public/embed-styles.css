@@ -406,3 +406,204 @@ body.compact .action-button {
         background: rgba(255, 255, 255, 0.12);
     }
 }
+
+/* Add Page Button */
+.add-page-container {
+    display: flex;
+    justify-content: center;
+    margin-top: 12px;
+    padding: 8px;
+}
+
+.add-page-button {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 16px;
+    background: rgba(46, 170, 220, 0.1);
+    border: 1px solid rgba(46, 170, 220, 0.2);
+    border-radius: 6px;
+    color: rgb(46, 170, 220);
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    font-family: inherit;
+}
+
+.add-page-button:hover {
+    background: rgba(46, 170, 220, 0.15);
+    border-color: rgba(46, 170, 220, 0.3);
+    transform: translateY(-1px);
+}
+
+.add-page-button:active {
+    transform: translateY(0);
+    background: rgba(46, 170, 220, 0.2);
+}
+
+.add-page-icon {
+    font-size: 16px;
+    font-weight: bold;
+}
+
+/* Add Page Modal */
+.add-page-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    animation: modalFadeIn 0.15s ease;
+}
+
+@keyframes modalFadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+.add-page-modal-content {
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+    width: 90%;
+    max-width: 480px;
+    max-height: 90vh;
+    overflow: hidden;
+    animation: modalSlideIn 0.15s ease;
+}
+
+@keyframes modalSlideIn {
+    from {
+        transform: translateY(-20px);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+.add-page-modal-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px 20px;
+    border-bottom: 1px solid rgba(227, 226, 224, 0.5);
+}
+
+.add-page-modal-header h3 {
+    font-size: 16px;
+    font-weight: 600;
+    color: rgb(55, 53, 47);
+    margin: 0;
+}
+
+.modal-close {
+    background: none;
+    border: none;
+    font-size: 20px;
+    color: rgb(120, 119, 116);
+    cursor: pointer;
+    padding: 4px;
+    border-radius: 4px;
+    transition: all 0.15s ease;
+}
+
+.modal-close:hover {
+    background: rgba(55, 53, 47, 0.08);
+    color: rgb(55, 53, 47);
+}
+
+.add-page-modal-body {
+    padding: 20px;
+}
+
+.add-page-modal-body label {
+    display: block;
+    font-size: 13px;
+    font-weight: 500;
+    color: rgb(55, 53, 47);
+    margin-bottom: 8px;
+}
+
+.add-page-modal-body textarea {
+    width: 100%;
+    padding: 10px 12px;
+    border: 1px solid rgba(227, 226, 224, 0.5);
+    border-radius: 6px;
+    font-size: 13px;
+    font-family: inherit;
+    resize: vertical;
+    min-height: 80px;
+    transition: border-color 0.15s ease;
+}
+
+.add-page-modal-body textarea:focus {
+    outline: none;
+    border-color: rgb(46, 170, 220);
+    box-shadow: 0 0 0 2px rgba(46, 170, 220, 0.2);
+}
+
+.add-page-modal-body textarea::placeholder {
+    color: rgb(120, 119, 116);
+}
+
+.add-page-modal-footer {
+    display: flex;
+    gap: 8px;
+    justify-content: flex-end;
+    margin-top: 16px;
+}
+
+.modal-button {
+    padding: 8px 16px;
+    border-radius: 6px;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    font-family: inherit;
+}
+
+.modal-button-secondary {
+    background: transparent;
+    border: 1px solid rgba(227, 226, 224, 0.5);
+    color: rgb(120, 119, 116);
+}
+
+.modal-button-secondary:hover {
+    background: rgba(55, 53, 47, 0.06);
+    color: rgb(55, 53, 47);
+}
+
+.modal-button-primary {
+    background: rgb(46, 170, 220);
+    border: 1px solid rgb(46, 170, 220);
+    color: white;
+}
+
+.modal-button-primary:hover {
+    background: rgb(35, 150, 200);
+    border-color: rgb(35, 150, 200);
+}
+
+.modal-button-primary:active {
+    background: rgb(25, 130, 180);
+}
+
+/* Empty state updates */
+.empty-state-subtitle {
+    font-size: 12px;
+    color: rgb(120, 119, 116);
+    margin-top: 4px;
+}
