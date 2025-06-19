@@ -3,7 +3,14 @@ A Notion integration for generating **embeddable** tree-like directory structure
 
 ## ✨ What This Is
 
-This creates an **embeddable widget** that you can add to any Notion page (just like adding a table, calendar, or other block). The tree automatically displays the hierarchy of child pages and databases.
+This creates an **embeddable widget** that you can add to any Notion page (just like adding a table, calendar, or other block). The tree automatically displays the hierarchy of child pages and databases with dynamic configuration capabilities.
+
+### 🆕 **Dynamic Configuration Features**
+- **Empty State Initialization**: Start with no pages and build your tree dynamically
+- **+ Add Page Button**: Click to add new Notion pages to your tree on-the-fly
+- **Multi-Page Support**: Display multiple page hierarchies in a single tree
+- **Smart URL Parsing**: Handles all Notion URL formats including workspace URLs
+- **Default Configuration**: Pre-configure default pages via environment variables
 
 ## 🚀 Quick Start
 
@@ -62,27 +69,179 @@ npm run dev
    - Go to the Notion page you want to visualize
    - Click "Share" → "Invite" → Select your integration
 
-4. **Run the application:**
+4. **Configure defaults (optional):**
+   ```env
+   # Add to .env file for default pages
+   DEFAULT_PAGE_IDS=page1,page2,page3
+   ```
+
+5. **Run the application:**
    ```bash
    npm run dev
    ```
 
-5. **Access the interface:**
+6. **Access the interface:**
    - Open http://localhost:3000
-   - Enter your Notion page ID or URL
-   - Click "Load Tree" to visualize the structure
+   - Generate embed URLs or test dynamic features
 
 ## Usage
 
-1. **Get Page ID**: Copy the page ID from your Notion page URL or use the full URL
-2. **Load Tree**: Paste the ID/URL and click "Load Tree"
-3. **Search**: Use the search box to filter or highlight content
-4. **Navigate**: Click arrow buttons to expand/collapse tree nodes
+### Basic Embed Creation
+1. **Get Page ID**: Copy page ID from Notion URL or paste the full URL
+2. **Configure Options**: Set compact view, search, auto-refresh, etc.
+3. **Generate Embed**: Copy the generated embed URL
+4. **Add to Notion**: Use `/embed` command in Notion and paste the URL
+
+### Dynamic Tree Building
+1. **Start Empty**: Create embed with no initial pages
+2. **Add Pages**: Click + button to add Notion page URLs
+3. **Multi-Page Trees**: Add multiple pages to create unified tree view
+4. **Search & Navigate**: Use search box and expand/collapse controls
 
 ## API Endpoints
 
-- `GET /api/tree/:pageId` - Fetch tree structure for a page
+- `GET /api/tree/:pageId` - Fetch tree structure for a page (supports comma-separated IDs)
+- `GET /api/config/defaults` - Get default configuration from server
 - `GET /api/search?q=query` - Search pages (optional)
+- `GET /api/cache/stats` - Cache statistics and performance metrics
+- `POST /api/cache/clear/:pageId?` - Clear cache for specific page or all cache
+- `GET /health` - Server health check and available endpoints
+
+## 🌐 Hosting & Deployment
+
+### Railway (Recommended)
+
+1. **Connect Repository:**
+   ```bash
+   # Push your code to GitHub first
+   git add .
+   git commit -m "Deploy to Railway"
+   git push origin main
+   ```
+
+2. **Deploy on Railway:**
+   - Visit [railway.app](https://railway.app)
+   - Click "Deploy from GitHub repo"
+   - Select your Notion-HomeTree repository
+   - Railway will auto-detect Node.js and deploy
+
+3. **Configure Environment:**
+   - In Railway dashboard, go to Variables tab
+   - Add: `NOTION_API_KEY=your_notion_integration_token`
+   - Add: `PORT=3000` (optional, Railway sets this automatically)
+   - Add: `DEFAULT_PAGE_IDS=page1,page2` (optional)
+
+4. **Get Your URL:**
+   - Railway provides a public URL like `https://your-app.railway.app`
+   - Use this URL for your embed: `https://your-app.railway.app/embed?pageId=...`
+
+### Heroku
+
+1. **Install Heroku CLI** and login:
+   ```bash
+   npm install -g heroku
+   heroku login
+   ```
+
+2. **Create Heroku App:**
+   ```bash
+   heroku create your-notion-hometree
+   ```
+
+3. **Configure Environment:**
+   ```bash
+   heroku config:set NOTION_API_KEY=your_notion_integration_token
+   heroku config:set DEFAULT_PAGE_IDS=page1,page2  # optional
+   ```
+
+4. **Deploy:**
+   ```bash
+   git push heroku main
+   ```
+
+5. **Open Your App:**
+   ```bash
+   heroku open
+   ```
+
+### Vercel
+
+1. **Install Vercel CLI:**
+   ```bash
+   npm install -g vercel
+   ```
+
+2. **Deploy:**
+   ```bash
+   vercel --prod
+   ```
+
+3. **Configure Environment:**
+   - In Vercel dashboard, go to Settings → Environment Variables
+   - Add `NOTION_API_KEY` and optionally `DEFAULT_PAGE_IDS`
+
+### Render
+
+1. **Connect Repository:**
+   - Visit [render.com](https://render.com)
+   - Connect your GitHub repository
+
+2. **Configure Build:**
+   - Build Command: `npm install`
+   - Start Command: `npm start`
+
+3. **Environment Variables:**
+   - Add `NOTION_API_KEY` in Environment section
+   - Add `DEFAULT_PAGE_IDS` if needed
+
+### Docker (Self-Hosted)
+
+1. **Create Dockerfile:**
+   ```dockerfile
+   FROM node:18-alpine
+   WORKDIR /app
+   COPY package*.json ./
+   RUN npm install --only=production
+   COPY . .
+   EXPOSE 3000
+   CMD ["npm", "start"]
+   ```
+
+2. **Build and Run:**
+   ```bash
+   docker build -t notion-hometree .
+   docker run -p 3000:3000 -e NOTION_API_KEY=your_token notion-hometree
+   ```
+
+### Environment Variables
+
+For all hosting platforms, configure these environment variables:
+
+```env
+# Required
+NOTION_API_KEY=your_notion_integration_token_here
+
+# Optional
+PORT=3000                           # Server port (auto-set by most platforms)
+DEFAULT_PAGE_IDS=page1,page2,page3  # Default pages for empty embeds
+CACHE_TTL=300                       # Cache duration in seconds
+AUTO_REFRESH_DEFAULT=0              # Default auto-refresh rate
+MAX_DEPTH_DEFAULT=3                 # Default tree depth limit
+```
+
+### Post-Deployment
+
+1. **Test Your Deployment:**
+   - Visit `https://your-domain.com/health` to verify server is running
+   - Visit `https://your-domain.com/test` to test functionality
+
+2. **Update Embed URLs:**
+   - Replace `localhost:3000` with your hosted domain
+   - Example: `https://your-app.railway.app/embed?pageId=mock`
+
+3. **Configure CORS (if needed):**
+   - The app is pre-configured for Notion embedding
+   - No additional CORS setup required for standard use
 
 ## 🧪 Testing
 
@@ -94,15 +253,25 @@ npm run dev
 ### Test Pages Available:
 - **Config UI**: http://localhost:3000
 - **Test Page**: http://localhost:3000/test (comprehensive testing interface)
+- **Documentation**: http://localhost:3000/docs
 - **Sample Embed**: http://localhost:3000/embed?pageId=mock
+- **Empty State**: http://localhost:3000/embed (test + button functionality)
 - **Health Check**: http://localhost:3000/health
 
 ### Testing Features:
-- Mock data endpoint for testing without Notion API
-- Responsive design testing at different sizes
-- Direct API endpoint testing
-- iframe embedding validation
-- Refresh and search functionality testing
+- **Mock Data**: Test without Notion API using sample data
+- **Dynamic Configuration**: Test + button and modal functionality
+- **Multi-Page Trees**: Test virtual root containers with multiple pages
+- **Responsive Design**: Test at different screen sizes
+- **API Endpoints**: Direct testing of all API endpoints
+- **Cache Performance**: Test caching and refresh functionality
+- **Default Config**: Test server-side default page loading
+
+### Dynamic Feature Testing:
+1. **Empty State**: Visit embed without pageId to test + button
+2. **Add Pages**: Use modal to add Notion URLs and test parsing
+3. **Multi-Root**: Test with `pageIds=mock,sample` parameter
+4. **Default Loading**: Configure `DEFAULT_PAGE_IDS` in .env and test
 
 ### With Real Notion Data:
 1. Configure `.env` with your Notion API key

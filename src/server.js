@@ -267,6 +267,11 @@ app.get('/health', (req, res) => {
   });
 });
 
+// Documentation page
+app.get('/docs', (req, res) => {
+  res.sendFile(path.join(__dirname, '../public/docs.html'));
+});
+
 // Main configuration page
 app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, '../public/index.html'));
