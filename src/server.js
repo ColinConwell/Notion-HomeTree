@@ -25,7 +25,10 @@ app.use((req, res, next) => {
   next();
 });
 
-const notionClient = new NotionTreeClient(process.env.NOTION_API_KEY);
+// Initialize Notion client only if API key is provided
+const notionClient = process.env.NOTION_API_KEY 
+  ? new NotionTreeClient(process.env.NOTION_API_KEY)
+  : null;
 
 // Cache setup - TTL in seconds
 const cache = new NodeCache({ 
@@ -156,6 +159,13 @@ app.get('/api/tree/:pageId', async (req, res) => {
         }
       }
       
+      // Check if Notion client is available
+      if (!notionClient) {
+        return res.status(500).json({ 
+          error: 'Notion API key not configured. Set NOTION_API_KEY environment variable.' 
+        });
+      }
+      
       // Fetch fresh data
       const tree = await notionClient.getPageTree(pageId, parseInt(maxDepth));
       
@@ -175,6 +185,13 @@ app.get('/api/tree/:pageId', async (req, res) => {
           res.json(cachedTree);
           return;
         }
+      }
+      
+      // Check if Notion client is available
+      if (!notionClient) {
+        return res.status(500).json({ 
+          error: 'Notion API key not configured. Set NOTION_API_KEY environment variable.' 
+        });
       }
       
       // Fetch all trees in parallel
@@ -253,6 +270,10 @@ app.get('/health', (req, res) => {
   res.json({ 
     status: 'healthy', 
     timestamp: new Date().toISOString(),
+    notion: {
+      apiConfigured: !!notionClient,
+      apiKey: process.env.NOTION_API_KEY ? 'Set' : 'Not Set'
+    },
     cache: {
       keys: cache.keys().length,
       stats: cache.getStats()
