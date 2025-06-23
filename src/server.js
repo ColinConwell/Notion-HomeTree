@@ -37,6 +37,10 @@ const cache = new NodeCache({
   useClones: false // Better performance for JSON objects
 });
 
+// Storage for saved embeds and page IDs (in production, use a database)
+const savedEmbeds = new Map();
+const savedPageIds = new Map();
+
 // Mock data for testing
 const mockTreeData = {
   id: 'mock-page-id',
@@ -279,7 +283,9 @@ app.get('/health', (req, res) => {
       stats: cache.getStats()
     },
     endpoints: {
-      config: `http://localhost:${PORT}/`,
+      home: `http://localhost:${PORT}/`,
+      config: `http://localhost:${PORT}/config`,
+      docs: `http://localhost:${PORT}/docs`,
       test: `http://localhost:${PORT}/test`,
       embed: `http://localhost:${PORT}/embed?pageId=mock`,
       api: `http://localhost:${PORT}/api/tree/mock`,
@@ -293,14 +299,187 @@ app.get('/docs', (req, res) => {
   res.sendFile(path.join(__dirname, '../public/docs.html'));
 });
 
-// Main configuration page
+// Helper function to verify API key
+function verifyApiKey(apiKey) {
+  return apiKey && process.env.NOTION_API_KEY && apiKey === process.env.NOTION_API_KEY;
+}
+
+// API key verification endpoint
+app.post('/api/verify-key', (req, res) => {
+  try {
+    const { apiKey } = req.body;
+    
+    if (!apiKey) {
+      return res.status(400).json({ error: 'API key is required' });
+    }
+    
+    if (!process.env.NOTION_API_KEY) {
+      return res.status(500).json({ error: 'Server API key not configured' });
+    }
+    
+    const isValid = verifyApiKey(apiKey);
+    
+    res.json({ 
+      valid: isValid,
+      message: isValid ? 'API key verified' : 'API key does not match'
+    });
+  } catch (error) {
+    console.error('API key verification error:', error);
+    res.status(500).json({ error: 'Verification failed' });
+  }
+});
+
+// Save embed configuration
+app.post('/api/embeds/save', (req, res) => {
+  try {
+    const { apiKey, embed } = req.body;
+    
+    if (!verifyApiKey(apiKey)) {
+      return res.status(401).json({ error: 'Invalid API key' });
+    }
+    
+    if (!embed || !embed.name) {
+      return res.status(400).json({ error: 'Embed configuration and name are required' });
+    }
+    
+    const embedId = Date.now().toString() + Math.random().toString(36).substr(2, 9);
+    const embedData = {
+      id: embedId,
+      name: embed.name,
+      description: embed.description || '',
+      config: embed.config,
+      pageIds: embed.pageIds || [],
+      createdAt: new Date().toISOString(),
+      lastUsed: new Date().toISOString()
+    };
+    
+    savedEmbeds.set(embedId, embedData);
+    
+    res.json({ 
+      success: true, 
+      embedId,
+      message: 'Embed saved successfully' 
+    });
+  } catch (error) {
+    console.error('Save embed error:', error);
+    res.status(500).json({ error: 'Failed to save embed' });
+  }
+});
+
+// Get saved embeds
+app.post('/api/embeds/list', (req, res) => {
+  try {
+    const { apiKey } = req.body;
+    
+    if (!verifyApiKey(apiKey)) {
+      return res.status(401).json({ error: 'Invalid API key' });
+    }
+    
+    const embeds = Array.from(savedEmbeds.values()).map(embed => ({
+      ...embed,
+      config: { ...embed.config, url: undefined } // Don't send full URLs in list
+    }));
+    
+    res.json({ embeds });
+  } catch (error) {
+    console.error('List embeds error:', error);
+    res.status(500).json({ error: 'Failed to get embeds' });
+  }
+});
+
+// Delete saved embed
+app.delete('/api/embeds/:embedId', (req, res) => {
+  try {
+    const { embedId } = req.params;
+    const { apiKey } = req.body;
+    
+    if (!verifyApiKey(apiKey)) {
+      return res.status(401).json({ error: 'Invalid API key' });
+    }
+    
+    if (savedEmbeds.has(embedId)) {
+      savedEmbeds.delete(embedId);
+      res.json({ success: true, message: 'Embed deleted' });
+    } else {
+      res.status(404).json({ error: 'Embed not found' });
+    }
+  } catch (error) {
+    console.error('Delete embed error:', error);
+    res.status(500).json({ error: 'Failed to delete embed' });
+  }
+});
+
+// Save page ID
+app.post('/api/pages/save', (req, res) => {
+  try {
+    const { apiKey, pageData } = req.body;
+    
+    if (!verifyApiKey(apiKey)) {
+      return res.status(401).json({ error: 'Invalid API key' });
+    }
+    
+    if (!pageData || !pageData.name || !pageData.pageId) {
+      return res.status(400).json({ error: 'Page name and ID are required' });
+    }
+    
+    const savedPageData = {
+      id: pageData.pageId,
+      name: pageData.name,
+      description: pageData.description || '',
+      url: pageData.url || '',
+      savedAt: new Date().toISOString()
+    };
+    
+    savedPageIds.set(pageData.pageId, savedPageData);
+    
+    res.json({ 
+      success: true, 
+      message: 'Page ID saved successfully' 
+    });
+  } catch (error) {
+    console.error('Save page ID error:', error);
+    res.status(500).json({ error: 'Failed to save page ID' });
+  }
+});
+
+// Get saved page IDs
+app.post('/api/pages/list', (req, res) => {
+  try {
+    const { apiKey } = req.body;
+    
+    if (!verifyApiKey(apiKey)) {
+      return res.status(401).json({ error: 'Invalid API key' });
+    }
+    
+    const pages = Array.from(savedPageIds.values());
+    res.json({ pages });
+  } catch (error) {
+    console.error('List pages error:', error);
+    res.status(500).json({ error: 'Failed to get pages' });
+  }
+});
+
+// Root page - Direct embed with defaults
 app.get('/', (req, res) => {
-  res.sendFile(path.join(__dirname, '../public/index.html'));
+  // If no default page IDs configured, redirect to config
+  if (!process.env.DEFAULT_PAGE_IDS) {
+    return res.redirect('/config');
+  }
+  
+  // Serve embed with defaults (same as /embed but with automatic defaults)
+  res.sendFile(path.join(__dirname, '../public/embed.html'));
+});
+
+// Configuration interface
+app.get('/config', (req, res) => {
+  res.sendFile(path.join(__dirname, '../public/config.html'));
 });
 
 app.listen(PORT, () => {
   console.log(`🚀 Notion HomeTree server running on port ${PORT}`);
-  console.log(`📝 Config page: http://localhost:${PORT}`);
+  console.log(`🏠 Home embed: http://localhost:${PORT}`);
+  console.log(`📝 Config page: http://localhost:${PORT}/config`);
+  console.log(`📚 Documentation: http://localhost:${PORT}/docs`);
   console.log(`🧪 Test page: http://localhost:${PORT}/test`);
   console.log(`🔗 Sample embed: http://localhost:${PORT}/embed?pageId=mock`);
   console.log(`💡 Health check: http://localhost:${PORT}/health`);

@@ -1,4 +1,5 @@
 # Notion-HomeTree
+
 A Notion integration for generating **embeddable** tree-like directory structures that can be added directly to Notion pages as blocks.
 
 ## ✨ What This Is
@@ -6,6 +7,7 @@ A Notion integration for generating **embeddable** tree-like directory structure
 This creates an **embeddable widget** that you can add to any Notion page (just like adding a table, calendar, or other block). The tree automatically displays the hierarchy of child pages and databases with dynamic configuration capabilities.
 
 ### 🆕 **Dynamic Configuration Features**
+
 - **Empty State Initialization**: Start with no pages and build your tree dynamically
 - **+ Add Page Button**: Click to add new Notion pages to your tree on-the-fly
 - **Multi-Page Support**: Display multiple page hierarchies in a single tree
@@ -17,20 +19,24 @@ This creates an **embeddable widget** that you can add to any Notion page (just 
 ### 1. Setup Server
 
 Install dependencies:
+
 ```bash
 npm install
 ```
 
 Configure Notion API:
+
 - Create a new integration at https://www.notion.so/my-integrations
 - Copy the integration token
 - Create `.env` file:
+
 ```
 NOTION_API_KEY=your_notion_integration_token_here
 PORT=3000
 ```
 
 Start the server:
+
 ```bash
 npm run dev
 ```
@@ -52,11 +58,12 @@ npm run dev
 ## Setup + Installation
 
 1. **Install dependencies:**
+
    ```bash
    npm install
    ```
-
 2. **Configure Notion API:**
+
    - Create a new integration at https://www.notion.so/my-integrations
    - Copy the integration token
    - Create a `.env` file based on `.env.example`:
@@ -64,35 +71,37 @@ npm run dev
      NOTION_API_KEY=your_notion_integration_token_here
      PORT=3000
      ```
-
 3. **Share your Notion page:**
+
    - Go to the Notion page you want to visualize
    - Click "Share" → "Invite" → Select your integration
-
 4. **Configure defaults (optional):**
+
    ```env
    # Add to .env file for default pages
    DEFAULT_PAGE_IDS=page1,page2,page3
    ```
-
 5. **Run the application:**
+
    ```bash
    npm run dev
    ```
-
 6. **Access the interface:**
+
    - Open http://localhost:3000
    - Generate embed URLs or test dynamic features
 
 ## Usage
 
 ### Basic Embed Creation
+
 1. **Get Page ID**: Copy page ID from Notion URL or paste the full URL
 2. **Configure Options**: Set compact view, search, auto-refresh, etc.
 3. **Generate Embed**: Copy the generated embed URL
 4. **Add to Notion**: Use `/embed` command in Notion and paste the URL
 
 ### Dynamic Tree Building
+
 1. **Start Empty**: Create embed with no initial pages
 2. **Add Pages**: Click + button to add Notion page URLs
 3. **Multi-Page Trees**: Add multiple pages to create unified tree view
@@ -112,54 +121,56 @@ npm run dev
 ### Railway (Recommended)
 
 1. **Connect Repository:**
+
    ```bash
    # Push your code to GitHub first
    git add .
    git commit -m "Deploy to Railway"
    git push origin main
    ```
-
 2. **Deploy on Railway:**
+
    - Visit [railway.app](https://railway.app)
    - Click "Deploy from GitHub repo"
    - Select your Notion-HomeTree repository
    - Railway will auto-detect Node.js and deploy
-
 3. **Configure Environment:**
+
    - In Railway dashboard, go to Variables tab
    - Add: `NOTION_API_KEY=your_notion_integration_token`
    - Add: `PORT=3000` (optional, Railway sets this automatically)
    - Add: `DEFAULT_PAGE_IDS=page1,page2` (optional)
-
 4. **Get Your URL:**
+
    - Railway provides a public URL like `https://your-app.railway.app`
    - Use this URL for your embed: `https://your-app.railway.app/embed?pageId=...`
 
 ### Heroku
 
 1. **Install Heroku CLI** and login:
+
    ```bash
    npm install -g heroku
    heroku login
    ```
-
 2. **Create Heroku App:**
+
    ```bash
    heroku create your-notion-hometree
    ```
-
 3. **Configure Environment:**
+
    ```bash
    heroku config:set NOTION_API_KEY=your_notion_integration_token
    heroku config:set DEFAULT_PAGE_IDS=page1,page2  # optional
    ```
-
 4. **Deploy:**
+
    ```bash
    git push heroku main
    ```
-
 5. **Open Your App:**
+
    ```bash
    heroku open
    ```
@@ -167,36 +178,39 @@ npm run dev
 ### Vercel
 
 1. **Install Vercel CLI:**
+
    ```bash
    npm install -g vercel
    ```
-
 2. **Deploy:**
+
    ```bash
    vercel --prod
    ```
-
 3. **Configure Environment:**
+
    - In Vercel dashboard, go to Settings → Environment Variables
    - Add `NOTION_API_KEY` and optionally `DEFAULT_PAGE_IDS`
 
 ### Render
 
 1. **Connect Repository:**
+
    - Visit [render.com](https://render.com)
    - Connect your GitHub repository
-
 2. **Configure Build:**
+
    - Build Command: `npm install`
    - Start Command: `npm start`
-
 3. **Environment Variables:**
+
    - Add `NOTION_API_KEY` in Environment section
    - Add `DEFAULT_PAGE_IDS` if needed
 
 ### Docker (Self-Hosted)
 
 1. **Create Dockerfile:**
+
    ```dockerfile
    FROM node:18-alpine
    WORKDIR /app
@@ -206,8 +220,8 @@ npm run dev
    EXPOSE 3000
    CMD ["npm", "start"]
    ```
-
 2. **Build and Run:**
+
    ```bash
    docker build -t notion-hometree .
    docker run -p 3000:3000 -e NOTION_API_KEY=your_token notion-hometree
@@ -232,25 +246,28 @@ MAX_DEPTH_DEFAULT=3                 # Default tree depth limit
 ### Post-Deployment
 
 1. **Test Your Deployment:**
+
    - Visit `https://your-domain.com/health` to verify server is running
    - Visit `https://your-domain.com/test` to test functionality
-
 2. **Update Embed URLs:**
+
    - Replace `localhost:3000` with your hosted domain
    - Example: `https://your-app.railway.app/embed?pageId=mock`
-
 3. **Configure CORS (if needed):**
+
    - The app is pre-configured for Notion embedding
    - No additional CORS setup required for standard use
 
 ## 🧪 Testing
 
 ### Quick Test (No Notion API Required)
+
 1. Start server: `npm run dev`
 2. Visit: http://localhost:3000/test
 3. Click "Load Mock Data" to see the tree in action
 
 ### Test Pages Available:
+
 - **Config UI**: http://localhost:3000
 - **Test Page**: http://localhost:3000/test (comprehensive testing interface)
 - **Documentation**: http://localhost:3000/docs
@@ -259,6 +276,7 @@ MAX_DEPTH_DEFAULT=3                 # Default tree depth limit
 - **Health Check**: http://localhost:3000/health
 
 ### Testing Features:
+
 - **Mock Data**: Test without Notion API using sample data
 - **Dynamic Configuration**: Test + button and modal functionality
 - **Multi-Page Trees**: Test virtual root containers with multiple pages
@@ -268,12 +286,14 @@ MAX_DEPTH_DEFAULT=3                 # Default tree depth limit
 - **Default Config**: Test server-side default page loading
 
 ### Dynamic Feature Testing:
+
 1. **Empty State**: Visit embed without pageId to test + button
 2. **Add Pages**: Use modal to add Notion URLs and test parsing
 3. **Multi-Root**: Test with `pageIds=mock,sample` parameter
 4. **Default Loading**: Configure `DEFAULT_PAGE_IDS` in .env and test
 
 ### With Real Notion Data:
+
 1. Configure `.env` with your Notion API key
 2. Share target pages with your integration
 3. Use real page IDs in the config or test page

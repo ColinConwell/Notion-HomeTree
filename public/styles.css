@@ -305,9 +305,42 @@ button:disabled {
     background: #f8f9fa;
 }
 
-.copy-btn {
+.copy-btn, .save-btn {
     padding: 10px 16px;
     min-width: 80px;
+    background: #3498db;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: background 0.3s ease;
+}
+
+.copy-btn:hover:not(:disabled) {
+    background: #2980b9;
+}
+
+.copy-btn:disabled {
+    background: #bdc3c7;
+    cursor: not-allowed;
+}
+
+.copy-btn.copied {
+    background: #27ae60;
+}
+
+.save-btn {
+    background: #27ae60;
+}
+
+.save-btn:hover:not(:disabled) {
+    background: #219a52;
+}
+
+.save-btn:disabled {
+    background: #bdc3c7;
+    cursor: not-allowed;
 }
 
 .instructions {
@@ -420,4 +453,183 @@ button:disabled {
     .copy-btn {
         align-self: flex-start;
     }
+}
+
+/* Modal styles */
+.modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    animation: modalFadeIn 0.15s ease;
+}
+
+.modal-content {
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+    max-width: 500px;
+    width: 90%;
+    max-height: 80vh;
+    overflow-y: auto;
+}
+
+.modal-header {
+    padding: 20px 20px 10px 20px;
+    border-bottom: 1px solid #e9ecef;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.modal-header h3 {
+    margin: 0;
+    color: #2c3e50;
+}
+
+.close {
+    font-size: 24px;
+    cursor: pointer;
+    color: #7f8c8d;
+    line-height: 1;
+}
+
+.close:hover {
+    color: #2c3e50;
+}
+
+.modal-body {
+    padding: 20px;
+}
+
+.modal-footer {
+    padding: 10px 20px 20px 20px;
+    display: flex;
+    gap: 10px;
+    justify-content: flex-end;
+}
+
+.btn-primary {
+    padding: 10px 20px;
+    background: #3498db;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: background 0.3s ease;
+}
+
+.btn-primary:hover {
+    background: #2980b9;
+}
+
+.btn-cancel {
+    padding: 10px 20px;
+    background: #95a5a6;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: background 0.3s ease;
+}
+
+.btn-cancel:hover {
+    background: #7f8c8d;
+}
+
+@keyframes modalFadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+/* Saved items container */
+.saved-items-container {
+    display: grid;
+    gap: 15px;
+    margin-bottom: 20px;
+}
+
+.saved-item {
+    background: #f8f9fa;
+    border: 1px solid #e9ecef;
+    border-radius: 8px;
+    padding: 15px;
+    transition: box-shadow 0.2s ease;
+}
+
+.saved-item:hover {
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.saved-item-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: start;
+    margin-bottom: 10px;
+}
+
+.saved-item-title {
+    font-weight: 600;
+    color: #2c3e50;
+    margin: 0;
+}
+
+.saved-item-actions {
+    display: flex;
+    gap: 8px;
+}
+
+.saved-item-btn {
+    padding: 4px 8px;
+    font-size: 12px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background 0.2s ease;
+}
+
+.saved-item-btn.copy {
+    background: #3498db;
+    color: white;
+}
+
+.saved-item-btn.copy:hover {
+    background: #2980b9;
+}
+
+.saved-item-btn.delete {
+    background: #e74c3c;
+    color: white;
+}
+
+.saved-item-btn.delete:hover {
+    background: #c0392b;
+}
+
+.saved-item-btn.use {
+    background: #27ae60;
+    color: white;
+}
+
+.saved-item-btn.use:hover {
+    background: #219a52;
+}
+
+.saved-item-description {
+    color: #7f8c8d;
+    font-size: 14px;
+    margin-bottom: 8px;
+}
+
+.saved-item-meta {
+    font-size: 12px;
+    color: #95a5a6;
 }

@@ -13,6 +13,33 @@
             <p>Generate embeddable tree views for your Notion pages</p>
         </header>
         
+        <!-- API Key Storage Section -->
+        <div class="config-section" id="apiKeySection">
+            <h2>🔐 API Key</h2>
+            <div class="input-group">
+                <label for="apiKey">Notion API Key (for saving configurations):</label>
+                <input type="password" id="apiKey" placeholder="Enter your Notion API key">
+                <small style="color: #666; margin-top: 4px; display: block;">Required to save embeds and page IDs. Key is verified against server configuration.</small>
+            </div>
+        </div>
+
+        <!-- Saved Pages Library -->
+        <div class="config-section" id="savedPagesSection" style="display: none;">
+            <h2>📚 Saved Page IDs</h2>
+            <div class="saved-items-container" id="savedPagesContainer">
+                <!-- Saved pages will be loaded here -->
+            </div>
+            <button class="btn" onclick="showSavePageModal()">+ Save Current Page</button>
+        </div>
+
+        <!-- Saved Embeds Library -->
+        <div class="config-section" id="savedEmbedsSection" style="display: none;">
+            <h2>💾 Saved Embeds</h2>
+            <div class="saved-items-container" id="savedEmbedsContainer">
+                <!-- Saved embeds will be loaded here -->
+            </div>
+        </div>
+
         <div class="config-section">
             <h2>🔧 Configuration</h2>
             <div class="controls">
@@ -77,6 +104,7 @@
                 <div class="url-display">
                     <input type="text" id="embedUrl" readonly placeholder="Configure above to generate embed URL">
                     <button id="copyUrl" class="copy-btn" disabled>Copy</button>
+                    <button id="saveEmbed" class="save-btn" disabled onclick="showSaveEmbedModal()">💾 Save</button>
                 </div>
                 
                 <div class="instructions">
@@ -119,6 +147,67 @@
                     <h3>3. Configure Server</h3>
                     <p>Set your <code>NOTION_API_KEY</code> in the .env file and restart the server</p>
                 </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Save Embed Modal -->
+    <div id="saveEmbedModal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>💾 Save Embed Configuration</h3>
+                <span class="close" onclick="closeSaveEmbedModal()">&times;</span>
+            </div>
+            <div class="modal-body">
+                <div class="input-group">
+                    <label for="embedName">Embed Name:</label>
+                    <input type="text" id="embedName" placeholder="e.g., My Project Tree">
+                </div>
+                <div class="input-group">
+                    <label for="embedDescription">Description (optional):</label>
+                    <input type="text" id="embedDescription" placeholder="Brief description of this embed">
+                </div>
+                <div class="input-group">
+                    <label for="saveApiKey">Confirm API Key:</label>
+                    <input type="password" id="saveApiKey" placeholder="Re-enter your Notion API key">
+                    <small style="color: #666; margin-top: 4px; display: block;">For security, please confirm your API key</small>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-cancel" onclick="closeSaveEmbedModal()">Cancel</button>
+                <button class="btn-primary" onclick="saveEmbedConfig()">Save Embed</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Save Page Modal -->
+    <div id="savePageModal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>📚 Save Page ID</h3>
+                <span class="close" onclick="closeSavePageModal()">&times;</span>
+            </div>
+            <div class="modal-body">
+                <div class="input-group">
+                    <label for="pageName">Page Name:</label>
+                    <input type="text" id="pageName" placeholder="e.g., My Important Page">
+                </div>
+                <div class="input-group">
+                    <label for="pageDescription">Description (optional):</label>
+                    <input type="text" id="pageDescription" placeholder="Brief description">
+                </div>
+                <div class="input-group">
+                    <label>Page ID/URL:</label>
+                    <input type="text" id="currentPageId" readonly>
+                </div>
+                <div class="input-group">
+                    <label for="savePageApiKey">Confirm API Key:</label>
+                    <input type="password" id="savePageApiKey" placeholder="Re-enter your Notion API key">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-cancel" onclick="closeSavePageModal()">Cancel</button>
+                <button class="btn-primary" onclick="savePageId()">Save Page</button>
             </div>
         </div>
     </div>
