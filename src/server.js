@@ -104,13 +104,7 @@ const mockTreeData = {
 app.get('/embed', (req, res) => {
   const { pageId, pageIds, theme = 'light', compact = 'false' } = req.query;
   
-  // Check for default page IDs if none provided
-  const defaultPageIds = process.env.DEFAULT_PAGE_IDS;
-  
-  if (!pageId && !pageIds && !defaultPageIds) {
-    return res.status(400).send('Page ID is required or set DEFAULT_PAGE_IDS in .env');
-  }
-  
+  // Allow empty embeds - they'll show the empty state with add button
   res.sendFile(path.join(__dirname, '../public/embed.html'));
 });
 

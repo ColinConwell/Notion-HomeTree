@@ -89,30 +89,74 @@ class NotionEmbedTree {
                 <div class="empty-state-subtitle">Click the + button below to add pages</div>
             </div>
         `;
-        this.addPageButton();
+        this.addTreeFooter();
         this.notifyParentOfResize();
     }
 
-    addPageButton() {
-        // Check if button already exists
-        if (document.getElementById('addPageButton')) return;
+    addTreeFooter() {
+        // Remove existing footer if it exists
+        const existingFooter = document.getElementById('treeFooter');
+        if (existingFooter) {
+            existingFooter.remove();
+        }
         
-        const container = document.getElementById('embedContainer');
-        const buttonContainer = document.createElement('div');
-        buttonContainer.className = 'add-page-container';
-        buttonContainer.innerHTML = `
-            <button id="addPageButton" class="add-page-button" title="Add new page to tree">
-                <span class="add-page-icon">+</span>
-                <span class="add-page-text">Add Page</span>
-            </button>
+        const treeContainer = document.getElementById('tree');
+        const footer = document.createElement('div');
+        footer.id = 'treeFooter';
+        footer.className = 'tree-footer';
+        
+        // Check if editing is locked (default to unlocked for now)
+        const isLocked = localStorage.getItem('treeEditLocked') === 'true';
+        
+        footer.innerHTML = `
+            <div class="tree-footer-controls">
+                <button id="toggleLockButton" class="footer-button lock-button ${isLocked ? 'locked' : 'unlocked'}" 
+                        title="${isLocked ? 'Unlock editing' : 'Lock editing'}">
+                    ${isLocked ? '🔒' : '🔓'}
+                </button>
+                <div id="addPageSection" class="add-page-section ${isLocked ? 'hidden' : ''}">
+                    <button id="addRootPageButton" class="footer-button add-page-button" title="Add new page as root node">
+                        <span class="add-icon">+</span>
+                        <span class="add-text">Add New Page as Root Node</span>
+                    </button>
+                </div>
+            </div>
         `;
         
-        container.appendChild(buttonContainer);
+        treeContainer.appendChild(footer);
         
-        // Add event listener
-        document.getElementById('addPageButton').addEventListener('click', () => {
+        // Add event listeners
+        document.getElementById('toggleLockButton').addEventListener('click', () => {
+            this.toggleEditLock();
+        });
+        
+        document.getElementById('addRootPageButton').addEventListener('click', () => {
             this.showAddPageModal();
         });
+    }
+    
+    toggleEditLock() {
+        const isLocked = localStorage.getItem('treeEditLocked') === 'true';
+        const newLockState = !isLocked;
+        
+        localStorage.setItem('treeEditLocked', newLockState.toString());
+        
+        const lockButton = document.getElementById('toggleLockButton');
+        const addPageSection = document.getElementById('addPageSection');
+        
+        if (newLockState) {
+            lockButton.innerHTML = '🔒';
+            lockButton.title = 'Unlock editing';
+            lockButton.classList.remove('unlocked');
+            lockButton.classList.add('locked');
+            addPageSection.classList.add('hidden');
+        } else {
+            lockButton.innerHTML = '🔓';
+            lockButton.title = 'Lock editing';
+            lockButton.classList.remove('locked');
+            lockButton.classList.add('unlocked');
+            addPageSection.classList.remove('hidden');
+        }
     }
 
     showAddPageModal() {
@@ -479,8 +523,8 @@ class NotionEmbedTree {
         treeContainer.innerHTML = '';
         treeContainer.appendChild(fragment);
         
-        // Add the + button below the tree
-        this.addPageButton();
+        // Add tree footer with controls
+        this.addTreeFooter();
         
         this.updateTreeDisplay();
         this.notifyParentOfResize();

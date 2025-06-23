@@ -408,43 +408,95 @@ body.compact .action-button {
 }
 
 /* Add Page Button */
-.add-page-container {
-    display: flex;
-    justify-content: center;
-    margin-top: 12px;
-    padding: 8px;
+/* Tree Footer */
+.tree-footer {
+    margin-top: 8px;
+    border-top: 1px solid rgba(55, 53, 47, 0.1);
+    padding-top: 8px;
 }
 
-.add-page-button {
+.tree-footer-controls {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.footer-button {
     display: flex;
     align-items: center;
     gap: 6px;
-    padding: 8px 16px;
-    background: rgba(46, 170, 220, 0.1);
-    border: 1px solid rgba(46, 170, 220, 0.2);
-    border-radius: 6px;
-    color: rgb(46, 170, 220);
-    font-size: 13px;
+    padding: 6px 12px;
+    border: 1px solid rgba(55, 53, 47, 0.2);
+    border-radius: 4px;
+    background: rgba(55, 53, 47, 0.05);
+    color: rgb(55, 53, 47);
+    font-size: 12px;
     font-weight: 500;
     cursor: pointer;
     transition: all 0.15s ease;
     font-family: inherit;
 }
 
+.footer-button:hover {
+    background: rgba(55, 53, 47, 0.08);
+    border-color: rgba(55, 53, 47, 0.3);
+}
+
+.lock-button {
+    min-width: 32px;
+    justify-content: center;
+    padding: 6px 8px;
+}
+
+.lock-button.locked {
+    background: rgba(235, 87, 87, 0.1);
+    border-color: rgba(235, 87, 87, 0.2);
+    color: rgb(193, 76, 76);
+}
+
+.lock-button.locked:hover {
+    background: rgba(235, 87, 87, 0.15);
+}
+
+.lock-button.unlocked {
+    background: rgba(46, 170, 220, 0.1);
+    border-color: rgba(46, 170, 220, 0.2);
+    color: rgb(46, 170, 220);
+}
+
+.lock-button.unlocked:hover {
+    background: rgba(46, 170, 220, 0.15);
+}
+
+.add-page-section {
+    flex: 1;
+    transition: opacity 0.2s ease;
+}
+
+.add-page-section.hidden {
+    opacity: 0;
+    pointer-events: none;
+}
+
+.add-icon {
+    font-size: 14px;
+    font-weight: bold;
+}
+
+.add-text {
+    font-size: 12px;
+}
+
+.add-page-button {
+    background: rgba(46, 170, 220, 0.1);
+    border-color: rgba(46, 170, 220, 0.2);
+    color: rgb(46, 170, 220);
+    flex: 1;
+}
+
 .add-page-button:hover {
     background: rgba(46, 170, 220, 0.15);
     border-color: rgba(46, 170, 220, 0.3);
-    transform: translateY(-1px);
-}
-
-.add-page-button:active {
-    transform: translateY(0);
-    background: rgba(46, 170, 220, 0.2);
-}
-
-.add-page-icon {
-    font-size: 16px;
-    font-weight: bold;
 }
 
 /* Add Page Modal */
