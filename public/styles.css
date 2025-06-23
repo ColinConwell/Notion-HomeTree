@@ -305,7 +305,7 @@ button:disabled {
     background: #f8f9fa;
 }
 
-.copy-btn, .save-btn {
+.copy-btn, .save-btn, .empty-btn {
     padding: 10px 16px;
     min-width: 80px;
     background: #3498db;
@@ -341,6 +341,14 @@ button:disabled {
 .save-btn:disabled {
     background: #bdc3c7;
     cursor: not-allowed;
+}
+
+.empty-btn {
+    background: #e67e22;
+}
+
+.empty-btn:hover {
+    background: #d35400;
 }
 
 .instructions {

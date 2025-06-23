@@ -63,6 +63,7 @@ class NotionTreeConfig {
         const multiPageIdsInput = document.getElementById('multiPageIds').value.trim();
         
         let effectivePageIds;
+        let hasPageIds = false;
         
         // Check if multiple page IDs are provided
         if (multiPageIdsInput) {
@@ -74,27 +75,28 @@ class NotionTreeConfig {
                 .map(line => this.extractPageId(line))
                 .filter(id => id !== null);
             
-            if (extractedIds.length === 0) {
-                this.clearEmbedUrl();
-                return;
+            if (extractedIds.length > 0) {
+                effectivePageIds = extractedIds.join(',');
+                hasPageIds = true;
             }
-            
-            effectivePageIds = extractedIds.join(',');
-        } else {
+        } else if (pageIdInput) {
             // Single page ID
             const pageId = this.extractPageId(pageIdInput);
-            if (!pageId) {
-                this.clearEmbedUrl();
-                return;
+            if (pageId) {
+                effectivePageIds = pageId;
+                hasPageIds = true;
             }
-            effectivePageIds = pageId;
         }
 
         const params = new URLSearchParams();
-        if (multiPageIdsInput) {
-            params.set('pageIds', effectivePageIds);
-        } else {
-            params.set('pageId', effectivePageIds);
+        
+        // Only add page parameters if we have valid page IDs
+        if (hasPageIds) {
+            if (multiPageIdsInput) {
+                params.set('pageIds', effectivePageIds);
+            } else {
+                params.set('pageId', effectivePageIds);
+            }
         }
         
         // Get configuration values
@@ -169,6 +171,17 @@ class NotionTreeConfig {
         previewFrame.src = '';
         previewFrame.style.display = 'none';
         placeholder.style.display = 'flex';
+    }
+
+    generateEmptyEmbed() {
+        // Clear all page inputs
+        document.getElementById('pageId').value = '';
+        document.getElementById('multiPageIds').value = '';
+        
+        // Force update to generate empty embed URL
+        this.updateEmbedUrl();
+        
+        this.showNotification('Empty embed URL generated! Use the + button in the embed to add pages dynamically.');
     }
 
     async copyEmbedUrl() {

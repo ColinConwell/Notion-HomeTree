@@ -105,15 +105,17 @@
                     <input type="text" id="embedUrl" readonly placeholder="Configure above to generate embed URL">
                     <button id="copyUrl" class="copy-btn" disabled>Copy</button>
                     <button id="saveEmbed" class="save-btn" disabled onclick="showSaveEmbedModal()">💾 Save</button>
+                    <button id="generateEmpty" class="empty-btn" onclick="configInstance.generateEmptyEmbed()">🆕 Generate Empty</button>
                 </div>
                 
                 <div class="instructions">
                     <h3>How to add to Notion:</h3>
                     <ol>
-                        <li>Copy the embed URL above</li>
+                        <li>Copy the embed URL above (or use "🆕 Generate Empty" for a blank tree)</li>
                         <li>In your Notion page, type <code>/embed</code></li>
                         <li>Paste the URL and press Enter</li>
                         <li>The tree will appear as an embedded block</li>
+                        <li>Use the ➕ button in the embed to add pages dynamically</li>
                         <li>Use the 🔄 button or <code>Cmd/Ctrl+R</code> to refresh</li>
                     </ol>
                 </div>
