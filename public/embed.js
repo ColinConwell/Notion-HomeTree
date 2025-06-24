@@ -10,6 +10,25 @@ class NotionEmbedTree {
         this.init();
     }
 
+    initializeLockButton() {
+        const isLocked = localStorage.getItem('treeEditLocked') === 'true';
+        const lockButton = document.getElementById('lockButton');
+        
+        if (lockButton) {
+            if (isLocked) {
+                lockButton.innerHTML = '🔒';
+                lockButton.title = 'Unlock editing';
+                lockButton.classList.remove('unlocked');
+                lockButton.classList.add('locked');
+            } else {
+                lockButton.innerHTML = '🔓';
+                lockButton.title = 'Lock editing';
+                lockButton.classList.remove('locked');
+                lockButton.classList.add('unlocked');
+            }
+        }
+    }
+
     parseUrlParams() {
         const params = new URLSearchParams(window.location.search);
         return {
@@ -32,9 +51,12 @@ class NotionEmbedTree {
         
         // Show/hide search based on config
         const searchContainer = document.getElementById('searchContainer');
-        if (this.config.showSearch) {
-            searchContainer.classList.remove('hidden');
+        if (!this.config.showSearch) {
+            searchContainer.style.display = 'none';
         }
+
+        // Initialize lock button state
+        this.initializeLockButton();
 
         this.initializeEventListeners();
         
@@ -156,6 +178,55 @@ class NotionEmbedTree {
             lockButton.classList.remove('locked');
             lockButton.classList.add('unlocked');
             addPageSection.classList.remove('hidden');
+        }
+    }
+
+    toggleGlobalEditLock() {
+        const isLocked = localStorage.getItem('treeEditLocked') === 'true';
+        const newLockState = !isLocked;
+        
+        localStorage.setItem('treeEditLocked', newLockState.toString());
+        
+        // Update toolbar lock button
+        const toolbarLockButton = document.getElementById('lockButton');
+        if (toolbarLockButton) {
+            if (newLockState) {
+                toolbarLockButton.innerHTML = '🔒';
+                toolbarLockButton.title = 'Unlock editing';
+                toolbarLockButton.classList.remove('unlocked');
+                toolbarLockButton.classList.add('locked');
+            } else {
+                toolbarLockButton.innerHTML = '🔓';
+                toolbarLockButton.title = 'Lock editing';
+                toolbarLockButton.classList.remove('locked');
+                toolbarLockButton.classList.add('unlocked');
+            }
+        }
+        
+        // Update footer lock button if it exists
+        const footerLockButton = document.getElementById('toggleLockButton');
+        if (footerLockButton) {
+            if (newLockState) {
+                footerLockButton.innerHTML = '🔒';
+                footerLockButton.title = 'Unlock editing';
+                footerLockButton.classList.remove('unlocked');
+                footerLockButton.classList.add('locked');
+            } else {
+                footerLockButton.innerHTML = '🔓';
+                footerLockButton.title = 'Lock editing';
+                footerLockButton.classList.remove('locked');
+                footerLockButton.classList.add('unlocked');
+            }
+        }
+        
+        // Show/hide add page section
+        const addPageSection = document.getElementById('addPageSection');
+        if (addPageSection) {
+            if (newLockState) {
+                addPageSection.classList.add('hidden');
+            } else {
+                addPageSection.classList.remove('hidden');
+            }
         }
     }
 
@@ -289,7 +360,7 @@ class NotionEmbedTree {
 
     initializeEventListeners() {
         const searchInput = document.getElementById('searchInput');
-        const searchToggle = document.getElementById('searchToggle');
+        const lockButton = document.getElementById('lockButton');
         const refreshButton = document.getElementById('refreshButton');
         const expandAllButton = document.getElementById('expandAllButton');
         const collapseAllButton = document.getElementById('collapseAllButton');
@@ -301,20 +372,9 @@ class NotionEmbedTree {
             });
         }
 
-        if (searchToggle) {
-            searchToggle.addEventListener('click', () => {
-                const searchContainer = document.getElementById('searchContainer');
-                const isHidden = searchContainer.classList.contains('hidden');
-                
-                if (isHidden) {
-                    searchContainer.classList.remove('hidden');
-                    searchInput.focus();
-                } else {
-                    searchContainer.classList.add('hidden');
-                    searchInput.value = '';
-                    this.searchTerm = '';
-                    this.updateTreeDisplay();
-                }
+        if (lockButton) {
+            lockButton.addEventListener('click', () => {
+                this.toggleGlobalEditLock();
             });
         }
 

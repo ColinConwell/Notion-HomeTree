@@ -4,24 +4,27 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Notion Tree</title>
-    <link rel="stylesheet" href="embed-styles.css">
+    <link rel="stylesheet" href="embed.css">
 </head>
 <body class="embed-body">
     <div id="embedContainer" class="embed-container">
-        <div id="searchContainer" class="search-container hidden">
-            <input 
-                type="text" 
-                id="searchInput" 
-                placeholder="Search tree..." 
-                class="search-input"
-            >
-            <button id="searchToggle" class="search-toggle" title="Toggle search">🔍</button>
-        </div>
-        
-        <div id="actionBar" class="action-bar">
-            <button type="button" id="refreshButton" class="action-button" title="Refresh tree">🔄</button>
-            <button type="button" id="expandAllButton" class="action-button" title="Expand all">📂</button>
-            <button type="button" id="collapseAllButton" class="action-button" title="Collapse all">📁</button>
+        <div id="toolbar" class="toolbar">
+            <div class="toolbar-left">
+                <button type="button" id="lockButton" class="toolbar-button lock-button unlocked" title="Lock editing">🔓</button>
+                <button type="button" id="refreshButton" class="toolbar-button" title="Refresh tree">🔄</button>
+            </div>
+            <div class="toolbar-right">
+                <div id="searchContainer" class="search-container">
+                    <input 
+                        type="text" 
+                        id="searchInput" 
+                        placeholder="Search tree..." 
+                        class="search-input"
+                    >
+                </div>
+                <button type="button" id="expandAllButton" class="toolbar-button" title="Expand all">📂</button>
+                <button type="button" id="collapseAllButton" class="toolbar-button" title="Collapse all">📁</button>
+            </div>
         </div>
         
         <div id="loadingIndicator" class="loading-indicator hidden">
@@ -36,6 +39,6 @@
         </div>
     </div>
     
-    <script src="embed-component.js"></script>
+    <script src="embed.js"></script>
 </body>
 </html>

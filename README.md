@@ -309,9 +309,9 @@ public/
 ├── index.html         # Main config interface
 ├── embed.html         # Embeddable widget
 ├── styles.css         # Config page styling
-├── embed-styles.css   # Widget styling
+├── embed.css   # Widget styling
 ├── config.js          # Configuration logic
-└── embed-component.js # Tree widget functionality
+└── embed.js # Tree widget functionality
 
 test.html              # Testing interface
 test-setup.md          # Testing documentation
