@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Notion HomeTree - Documentation</title>
+    <script src="icons.js"></script>
     <style>
         * {
             margin: 0;
@@ -277,7 +278,7 @@ npm install</div>
                 </div>
                 
                 <div class="feature-card">
-                    <h4>🔍 Smart Search</h4>
+                    <h4><span data-icon="search"></span> Smart Search</h4>
                     <p>Real-time search with highlighting. Filter or highlight matching content as you type.</p>
                 </div>
                 
@@ -292,19 +293,19 @@ npm install</div>
                 </div>
                 
                 <div class="feature-card">
-                    <h4>🌳 Multi-Root Trees</h4>
+                    <h4><span data-icon="folder"></span> Multi-Root Trees</h4>
                     <p>Display multiple page hierarchies in a single unified tree view with virtual containers.</p>
                 </div>
                 
                 <div class="feature-card">
-                    <h4>➕ Dynamic Configuration</h4>
+                    <h4><span data-icon="plus"></span> Dynamic Configuration</h4>
                     <p>Start empty and add pages dynamically. Modal interface for easy page addition.</p>
                 </div>
             </div>
         </div>
 
         <div id="embed-configuration" class="section">
-            <h2>⚙️ Embed Configuration</h2>
+            <h2><span data-icon="settings"></span> Embed Configuration</h2>
             
             <h3>URL Parameters</h3>
             <p>Customize your embed using these URL parameters:</p>
@@ -438,11 +439,11 @@ MAX_DEPTH_DEFAULT=3</div>
         </div>
 
         <div id="troubleshooting" class="section">
-            <h2>🔧 Troubleshooting</h2>
+            <h2><span data-icon="wrench"></span> Troubleshooting</h2>
             
             <h3>Common Issues</h3>
             
-            <h4>❌ "Page ID is required" Error</h4>
+            <h4><span data-icon="x"></span> "Page ID is required" Error</h4>
             <ul>
                 <li>Ensure you've shared the page with your Notion integration</li>
                 <li>Check that the page ID is correctly formatted (32 hex characters)</li>
@@ -456,7 +457,7 @@ MAX_DEPTH_DEFAULT=3</div>
                 <li>Test with <span class="inline-code">/health</span> endpoint</li>
             </ul>
             
-            <h4>➕ Add Page Button Not Working</h4>
+            <h4><span data-icon="plus"></span> Add Page Button Not Working</h4>
             <ul>
                 <li>Ensure JavaScript is enabled</li>
                 <li>Check browser console for modal errors</li>
@@ -496,5 +497,18 @@ MAX_DEPTH_DEFAULT=3</div>
             </div>
         </div>
     </div>
+    
+    <script>
+        // Initialize icons when page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            const iconElements = document.querySelectorAll('[data-icon]');
+            iconElements.forEach(element => {
+                const iconName = element.getAttribute('data-icon');
+                if (iconName && window.IconUtils) {
+                    element.innerHTML = window.IconUtils.getIcon(iconName);
+                }
+            });
+        });
+    </script>
 </body>
 </html>

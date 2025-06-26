@@ -5,27 +5,28 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Notion HomeTree - Configuration</title>
     <link rel="stylesheet" href="styles.css">
+    <script src="icons.js"></script>
 </head>
 <body>
     <div class="container">
         <header>
-            <h1>📁 Notion HomeTree</h1>
+            <h1><span class="header-icon" data-icon="folder"></span> Notion HomeTree</h1>
             <p>Generate embeddable tree views for your Notion pages</p>
         </header>
         
         <!-- API Key Storage Section -->
         <div class="config-section" id="apiKeySection">
-            <h2>🔐 API Key</h2>
+            <h2><span data-icon="lock"></span> API Key</h2>
             <div class="input-group">
                 <label for="apiKey">Notion API Key (for saving configurations):</label>
-                <input type="password" id="apiKey" placeholder="Enter your Notion API key">
+                <input type="password" id="apiKey" placeholder="Notion API key">
                 <small style="color: #666; margin-top: 4px; display: block;">Required to save embeds and page IDs. Key is verified against server configuration.</small>
             </div>
         </div>
 
         <!-- Saved Pages Library -->
         <div class="config-section" id="savedPagesSection" style="display: none;">
-            <h2>📚 Saved Page IDs</h2>
+            <h2><span data-icon="book"></span> Saved Page IDs</h2>
             <div class="saved-items-container" id="savedPagesContainer">
                 <!-- Saved pages will be loaded here -->
             </div>
@@ -34,14 +35,14 @@
 
         <!-- Saved Embeds Library -->
         <div class="config-section" id="savedEmbedsSection" style="display: none;">
-            <h2>💾 Saved Embeds</h2>
+            <h2><span data-icon="save"></span> Saved Embeds</h2>
             <div class="saved-items-container" id="savedEmbedsContainer">
                 <!-- Saved embeds will be loaded here -->
             </div>
         </div>
 
         <div class="config-section">
-            <h2>🔧 Configuration</h2>
+            <h2><span data-icon="wrench"></span> Configuration</h2>
             <div class="controls">
                 <div class="input-group">
                     <label for="pageId">Notion Page ID or URL:</label>
@@ -50,26 +51,21 @@
                 </div>
                 
                 <div class="input-group">
-                    <label for="multiPageIds">Multiple Page URLs/IDs (one per line):</label>
+                    <label for="multiPageIds" style="min-width: 200px;">Multiple Page IDs / URLs:</label>
                     <textarea 
                         id="multiPageIds" 
-                        placeholder="https://www.notion.so/page1&#10;https://www.notion.so/page2&#10;page-id-3"
+                        placeholder="Page ID or URL 1&#10;Page ID or URL 2&#10;Page ID or URL 3"
                         rows="4"
                         style="width: 100%; padding: 8px; margin-top: 4px; border: 1px solid #ddd; border-radius: 4px; font-family: inherit; resize: vertical;"
                     ></textarea>
-                    <small style="color: #666; margin-top: 4px; display: block;">For multi-root trees (overrides single page above)</small>
+                    <small style="color: #666; margin-top: 4px; display: block;">For multi-root trees (overrides single page)</small>
                 </div>
                 
                 <div class="options-grid">
                     <div class="option-group">
-                        <label for="maxDepth">Max Depth:</label>
-                        <select id="maxDepth">
-                            <option value="1">1 level</option>
-                            <option value="2">2 levels</option>
-                            <option value="3" selected>3 levels</option>
-                            <option value="4">4 levels</option>
-                            <option value="5">5 levels</option>
-                        </select>
+                        <label>
+                            Max depth: <input type="number" id="maxDepth" min="1" max="10" value="3" class="number-input">
+                        </label>
                     </div>
                     
                     <div class="option-group">
@@ -91,64 +87,56 @@
                     </div>
                     
                     <div class="option-group">
-                        <label for="autoRefresh">Auto-refresh rate (seconds, 0 = disabled)</label>
-                        <input type="number" id="autoRefresh" min="0" max="3600" value="0" placeholder="0">
+                        <label for="autoRefresh">
+                            Auto-refresh (seconds):
+                            <input type="number" id="autoRefresh" min="0" max="3600" value="0" placeholder="0" step="100">
+                        </label>
                     </div>
                 </div>
             </div>
         </div>
         
         <div class="embed-section">
-            <h2>🎯 Embed URL</h2>
+            <h2><span data-icon="link"></span> Embed URL</h2>
             <div class="embed-output">
                 <div class="url-display">
                     <input type="text" id="embedUrl" readonly placeholder="Configure above to generate embed URL">
                     <button id="copyUrl" class="copy-btn" disabled>Copy</button>
-                    <button id="saveEmbed" class="save-btn" disabled onclick="showSaveEmbedModal()">💾 Save</button>
-                    <button id="generateEmpty" class="empty-btn" onclick="configInstance.generateEmptyEmbed()">🆕 Generate Empty</button>
-                </div>
-                
-                <div class="instructions">
-                    <h3>How to add to Notion:</h3>
-                    <ol>
-                        <li>Copy the embed URL above (or use "🆕 Generate Empty" for a blank tree)</li>
-                        <li>In your Notion page, type <code>/embed</code></li>
-                        <li>Paste the URL and press Enter</li>
-                        <li>The tree will appear as an embedded block</li>
-                        <li>Use the ➕ button in the embed to add pages dynamically</li>
-                        <li>Use the 🔄 button or <code>Cmd/Ctrl+R</code> to refresh</li>
-                    </ol>
+                    <button id="saveEmbed" class="save-btn" disabled onclick="showSaveEmbedModal()"><span data-icon="save"></span> Save</button>
+                    <button id="generateEmpty" class="empty-btn" onclick="configInstance.generateEmptyEmbed()"><span data-icon="sparkles"></span> Generate Empty</button>
                 </div>
             </div>
-        </div>
-        
-        <div class="preview-section">
-            <h2>👀 Preview</h2>
+
+            <h2><span data-icon="eye"></span> Embed Preview</h2>
             <div class="preview-container">
                 <iframe id="previewFrame" src="" frameborder="0"></iframe>
                 <div id="previewPlaceholder" class="preview-placeholder">
                     Configure options above to see preview
                 </div>
             </div>
+
         </div>
         
         <div class="setup-section">
-            <h2>⚙️ Setup Instructions</h2>
-            <div class="setup-steps">
-                <div class="step">
-                    <h3>1. Create Notion Integration</h3>
-                    <p>Go to <a href="https://www.notion.so/my-integrations" target="_blank">notion.so/my-integrations</a> and create a new integration</p>
-                </div>
-                
-                <div class="step">
-                    <h3>2. Share Page with Integration</h3>
-                    <p>In your Notion page, click "Share" → "Invite" → Select your integration</p>
-                </div>
-                
-                <div class="step">
-                    <h3>3. Configure Server</h3>
-                    <p>Set your <code>NOTION_API_KEY</code> in the .env file and restart the server</p>
-                </div>
+            <h2><span data-icon="settings"></span> Setup Instructions</h2>
+            <div class="instructions">
+                <h3>Create / Configure HomeTree Integration</h3>
+                <ol>
+                    <li>Go to <a href="https://www.notion.so/my-integrations" target="_blank">notion.so/my-integrations</a> and create a new integration</li>
+                    <li>In your Notion page, click "Share" → "Invite" → Select your integration</li>
+                    <li>Set your <code>NOTION_API_KEY</code> in the .env file and restart the server</li>
+                </ol>
+            </div>
+            <div class="instructions">
+                <h3>Create / Configure HomeTree Embed</h3>
+                <ol>
+                    <li>Copy the embed URL above (or use "🆕 Generate Empty" for a blank tree)</li>
+                    <li>In your Notion page, type <code>/embed</code></li>
+                    <li>Paste the URL and press Enter</li>
+                    <li>The tree will appear as an embedded block</li>
+                    <li>Use the <span data-icon="plus"></span> button in the embed to add pages dynamically</li>
+                    <li>Use the <span data-icon="refresh"></span> button or <code>Cmd/Ctrl+R</code> to refresh</li>
+                </ol>
             </div>
         </div>
     </div>
@@ -157,7 +145,7 @@
     <div id="saveEmbedModal" class="modal" style="display: none;">
         <div class="modal-content">
             <div class="modal-header">
-                <h3>💾 Save Embed Configuration</h3>
+                <h3><span data-icon="save"></span> Save Embed Configuration</h3>
                 <span class="close" onclick="closeSaveEmbedModal()">&times;</span>
             </div>
             <div class="modal-body">
@@ -186,7 +174,7 @@
     <div id="savePageModal" class="modal" style="display: none;">
         <div class="modal-content">
             <div class="modal-header">
-                <h3>📚 Save Page ID</h3>
+                <h3><span data-icon="book"></span> Save Page ID</h3>
                 <span class="close" onclick="closeSavePageModal()">&times;</span>
             </div>
             <div class="modal-body">
@@ -215,5 +203,17 @@
     </div>
     
     <script src="config.js"></script>
+    <script>
+        // Initialize icons when page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            const iconElements = document.querySelectorAll('[data-icon]');
+            iconElements.forEach(element => {
+                const iconName = element.getAttribute('data-icon');
+                if (iconName && window.IconUtils) {
+                    element.innerHTML = window.IconUtils.getIcon(iconName);
+                }
+            });
+        });
+    </script>
 </body>
 </html>

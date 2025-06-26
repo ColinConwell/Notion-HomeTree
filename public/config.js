@@ -157,11 +157,8 @@ class NotionTreeConfig {
         previewFrame.style.display = 'block';
         placeholder.style.display = 'none';
         
-        // Set iframe dimensions
-        previewFrame.style.width = '100%';
-        previewFrame.style.height = '300px';
-        previewFrame.style.border = '1px solid #e9ecef';
-        previewFrame.style.borderRadius = '8px';
+        // Remove fixed dimensions - let CSS handle responsive sizing
+        // The iframe will now expand to fill its container
     }
 
     clearPreview() {

@@ -176,7 +176,7 @@
         </div>
 
         <div class="test-section">
-            <h2>🔗 Direct API Testing</h2>
+            <h2>Direct API Testing</h2>
             <p>Test the API endpoints directly:</p>
             
             <div>
@@ -188,7 +188,7 @@
         </div>
         
         <div class="test-section">
-            <h2>📱 Responsive Tests</h2>
+            <h2>Responsive Tests</h2>
             <p>Test different sizes to ensure responsive behavior:</p>
             
             <div style="display: flex; gap: 20px; flex-wrap: wrap;">
@@ -289,7 +289,7 @@
                 const response = await fetch('http://localhost:3000/');
                 const ok = response.ok;
                 
-                responseEl.textContent = `Server Status: ${ok ? 'Running ✅' : 'Error ❌'}\nResponse: ${response.status} ${response.statusText}`;
+                responseEl.textContent = `Server Status: ${ok ? 'Running ✓' : 'Error ✗'}\nResponse: ${response.status} ${response.statusText}`;
                 responseEl.style.display = 'block';
             } catch (error) {
                 responseEl.textContent = `Server Error: ${error.message}\nMake sure server is running: npm run dev`;

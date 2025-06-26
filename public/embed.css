@@ -25,6 +25,7 @@ html, body {
     flex-direction: column;
     background: transparent;
     padding: 8px;
+    min-height: 300px;
 }
 
 /* Search Container */
@@ -98,19 +99,29 @@ html, body {
     border: none;
     font-size: 14px;
     cursor: pointer;
-    padding: 6px 8px;
+    padding: 8px 12px;
     border-radius: 4px;
     display: flex;
     align-items: center;
     justify-content: center;
     transition: all 0.15s ease;
     color: rgba(55, 53, 47, 0.6);
-    min-width: 28px;
-    height: 28px;
+    min-width: 36px;
+    height: 36px;
+}
+
+.toolbar-button svg {
+    width: 16px;
+    height: 16px;
+    color: rgba(55, 53, 47, 0.6);
 }
 
 .toolbar-button:hover {
     background: rgba(55, 53, 47, 0.08);
+    color: rgba(55, 53, 47, 0.8);
+}
+
+.toolbar-button:hover svg {
     color: rgba(55, 53, 47, 0.8);
 }
 
@@ -125,6 +136,11 @@ html, body {
 
 .toolbar-button:disabled:hover {
     background: none;
+    color: rgba(55, 53, 47, 0.6);
+}
+
+.toolbar-button:disabled svg {
+    color: rgba(55, 53, 47, 0.3);
 }
 
 .toolbar-button.refreshing {
@@ -195,11 +211,15 @@ html, body {
 .tree-container {
     flex: 1;
     overflow-y: auto;
-    min-height: 120px;
+    min-height: 200px;
+    display: flex;
+    flex-direction: column;
 }
 
 .tree {
-    padding: 4px 0;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
 }
 
 /* Tree Nodes */
@@ -250,6 +270,12 @@ html, body {
     transition: all 0.15s ease;
 }
 
+.tree-toggle svg {
+    width: 12px;
+    height: 12px;
+    color: rgba(55, 53, 47, 0.5);
+}
+
 .tree-toggle:hover {
     background: rgba(55, 53, 47, 0.08);
     color: rgba(55, 53, 47, 0.8);
@@ -269,6 +295,13 @@ html, body {
     width: 16px;
     text-align: center;
     flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.tree-node-icon svg {
+    color: rgba(55, 53, 47, 0.6);
 }
 
 .tree-node-title {
@@ -320,7 +353,8 @@ html, body {
     padding: 32px 16px;
     text-align: center;
     color: rgba(55, 53, 47, 0.4);
-    min-height: 100px;
+    flex: 1;
+    min-height: 150px;
 }
 
 .empty-state-icon {
@@ -356,9 +390,9 @@ body.compact .search-input {
 }
 
 body.compact .toolbar-button {
-    min-width: 24px;
-    height: 24px;
-    padding: 4px 6px;
+    min-width: 32px;
+    height: 32px;
+    padding: 6px 8px;
     font-size: 12px;
 }
 
@@ -412,9 +446,21 @@ body.compact .tree-children {
         color: rgba(255, 255, 255, 0.4);
     }
     
+    .tree-toggle svg {
+        color: rgba(255, 255, 255, 0.4);
+    }
+    
     .tree-toggle:hover {
         background: rgba(255, 255, 255, 0.08);
         color: rgba(255, 255, 255, 0.7);
+    }
+    
+    .tree-toggle:hover svg {
+        color: rgba(255, 255, 255, 0.7);
+    }
+    
+    .tree-node-icon svg {
+        color: rgba(255, 255, 255, 0.6);
     }
     
     .tree-node-title {
@@ -503,6 +549,9 @@ body.compact .tree-children {
 .add-page-section {
     flex: 1;
     transition: opacity 0.2s ease;
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }
 
 .add-page-section.hidden {

@@ -133,8 +133,8 @@ class NotionTreeComponent {
         const hasChildren = node.children && node.children.length > 0;
         const isCollapsed = this.collapsedNodes.has(node.id);
         
-        const icon = node.type === 'database' ? '🗃️' : '📄';
-        const toggleIcon = hasChildren ? (isCollapsed ? '▶' : '▼') : '';
+        const icon = node.type === 'database' ? window.IconUtils.getIcon('database') : window.IconUtils.getIcon('file');
+        const toggleIcon = hasChildren ? (isCollapsed ? window.IconUtils.getIcon('chevronRight') : window.IconUtils.getIcon('chevronDown')) : '';
         
         let html = `
             <div class="tree-node ${isCollapsed ? 'collapsed' : ''}" data-id="${node.id}">

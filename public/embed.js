@@ -16,12 +16,12 @@ class NotionEmbedTree {
         
         if (lockButton) {
             if (isLocked) {
-                lockButton.innerHTML = '🔒';
+                lockButton.innerHTML = window.IconUtils.getIcon('lock');
                 lockButton.title = 'Unlock editing';
                 lockButton.classList.remove('unlocked');
                 lockButton.classList.add('locked');
             } else {
-                lockButton.innerHTML = '🔓';
+                lockButton.innerHTML = window.IconUtils.getIcon('unlock');
                 lockButton.title = 'Lock editing';
                 lockButton.classList.remove('locked');
                 lockButton.classList.add('unlocked');
@@ -106,16 +106,18 @@ class NotionEmbedTree {
         const treeContainer = document.getElementById('tree');
         treeContainer.innerHTML = `
             <div class="empty-state">
-                <div class="empty-state-icon">📁</div>
+                <div class="empty-state-icon">${window.IconUtils.getIcon('folder', {width: '32', height: '32'})}</div>
                 <div class="empty-state-text">No pages configured</div>
                 <div class="empty-state-subtitle">Click the + button below to add pages</div>
             </div>
         `;
-        this.addTreeFooter();
+        // Always add the tree footer with the add button, regardless of lock state for empty trees
+        this.addTreeFooter(true); // Pass true to force show add button for empty state
+        this.updateToggleAllButton(); // Disable the toggle button for empty state
         this.notifyParentOfResize();
     }
 
-    addTreeFooter() {
+    addTreeFooter(forceShowAddButton = false) {
         // Remove existing footer if it exists
         const existingFooter = document.getElementById('treeFooter');
         if (existingFooter) {
@@ -130,13 +132,16 @@ class NotionEmbedTree {
         // Check if editing is locked (default to unlocked for now)
         const isLocked = localStorage.getItem('treeEditLocked') === 'true';
         
+        // For empty states, always show the add button regardless of lock state
+        const shouldShowAddButton = forceShowAddButton || !isLocked;
+        
         footer.innerHTML = `
             <div class="tree-footer-controls">
                 <button id="toggleLockButton" class="footer-button lock-button ${isLocked ? 'locked' : 'unlocked'}" 
                         title="${isLocked ? 'Unlock editing' : 'Lock editing'}">
-                    ${isLocked ? '🔒' : '🔓'}
+                    ${isLocked ? window.IconUtils.getIcon('lock') : window.IconUtils.getIcon('unlock')}
                 </button>
-                <div id="addPageSection" class="add-page-section ${isLocked ? 'hidden' : ''}">
+                <div id="addPageSection" class="add-page-section ${shouldShowAddButton ? '' : 'hidden'}">
                     <button id="addRootPageButton" class="footer-button add-page-button" title="Add new page as root node">
                         <span class="add-icon">+</span>
                         <span class="add-text">Add New Page as Root Node</span>
@@ -167,13 +172,13 @@ class NotionEmbedTree {
         const addPageSection = document.getElementById('addPageSection');
         
         if (newLockState) {
-            lockButton.innerHTML = '🔒';
+            lockButton.innerHTML = window.IconUtils.getIcon('lock');
             lockButton.title = 'Unlock editing';
             lockButton.classList.remove('unlocked');
             lockButton.classList.add('locked');
             addPageSection.classList.add('hidden');
         } else {
-            lockButton.innerHTML = '🔓';
+            lockButton.innerHTML = window.IconUtils.getIcon('unlock');
             lockButton.title = 'Lock editing';
             lockButton.classList.remove('locked');
             lockButton.classList.add('unlocked');
@@ -191,12 +196,12 @@ class NotionEmbedTree {
         const toolbarLockButton = document.getElementById('lockButton');
         if (toolbarLockButton) {
             if (newLockState) {
-                toolbarLockButton.innerHTML = '🔒';
+                toolbarLockButton.innerHTML = window.IconUtils.getIcon('lock');
                 toolbarLockButton.title = 'Unlock editing';
                 toolbarLockButton.classList.remove('unlocked');
                 toolbarLockButton.classList.add('locked');
             } else {
-                toolbarLockButton.innerHTML = '🔓';
+                toolbarLockButton.innerHTML = window.IconUtils.getIcon('unlock');
                 toolbarLockButton.title = 'Lock editing';
                 toolbarLockButton.classList.remove('locked');
                 toolbarLockButton.classList.add('unlocked');
@@ -207,12 +212,12 @@ class NotionEmbedTree {
         const footerLockButton = document.getElementById('toggleLockButton');
         if (footerLockButton) {
             if (newLockState) {
-                footerLockButton.innerHTML = '🔒';
+                footerLockButton.innerHTML = window.IconUtils.getIcon('lock');
                 footerLockButton.title = 'Unlock editing';
                 footerLockButton.classList.remove('unlocked');
                 footerLockButton.classList.add('locked');
             } else {
-                footerLockButton.innerHTML = '🔓';
+                footerLockButton.innerHTML = window.IconUtils.getIcon('unlock');
                 footerLockButton.title = 'Lock editing';
                 footerLockButton.classList.remove('locked');
                 footerLockButton.classList.add('unlocked');
@@ -362,8 +367,7 @@ class NotionEmbedTree {
         const searchInput = document.getElementById('searchInput');
         const lockButton = document.getElementById('lockButton');
         const refreshButton = document.getElementById('refreshButton');
-        const expandAllButton = document.getElementById('expandAllButton');
-        const collapseAllButton = document.getElementById('collapseAllButton');
+        const toggleAllButton = document.getElementById('toggleAllButton');
 
         if (searchInput) {
             searchInput.addEventListener('input', (e) => {
@@ -384,15 +388,9 @@ class NotionEmbedTree {
             });
         }
 
-        if (expandAllButton) {
-            expandAllButton.addEventListener('click', () => {
-                this.expandAllNodes();
-            });
-        }
-
-        if (collapseAllButton) {
-            collapseAllButton.addEventListener('click', () => {
-                this.collapseAllNodes();
+        if (toggleAllButton) {
+            toggleAllButton.addEventListener('click', () => {
+                this.toggleAllNodes();
             });
         }
 
@@ -403,15 +401,10 @@ class NotionEmbedTree {
                 e.preventDefault();
                 this.refreshTree();
             }
-            // Cmd/Ctrl + E for expand all
+            // Cmd/Ctrl + E for toggle expand/collapse all
             if ((e.metaKey || e.ctrlKey) && e.key === 'e') {
                 e.preventDefault();
-                this.expandAllNodes();
-            }
-            // Cmd/Ctrl + Shift + E for collapse all
-            if ((e.metaKey || e.ctrlKey) && e.shiftKey && e.key === 'E') {
-                e.preventDefault();
-                this.collapseAllNodes();
+                this.toggleAllNodes();
             }
         });
     }
@@ -587,6 +580,7 @@ class NotionEmbedTree {
         this.addTreeFooter();
         
         this.updateTreeDisplay();
+        this.updateToggleAllButton();
         this.notifyParentOfResize();
     }
 
@@ -595,7 +589,7 @@ class NotionEmbedTree {
         const isCollapsed = this.collapsedNodes.has(node.id);
         
         const icon = this.getNodeIcon(node);
-        const toggleIcon = hasChildren ? (isCollapsed ? '▶' : '▼') : '';
+        const toggleIcon = hasChildren ? (isCollapsed ? window.IconUtils.getIcon('chevronRight') : window.IconUtils.getIcon('chevronDown')) : '';
         
         let html = `
             <div class="tree-node ${isCollapsed ? 'collapsed' : ''}" data-id="${node.id}">
@@ -637,12 +631,12 @@ class NotionEmbedTree {
         const toggleButton = document.createElement('button');
         toggleButton.className = `tree-toggle ${!hasChildren ? 'empty' : ''}`;
         toggleButton.dataset.nodeId = node.id;
-        toggleButton.textContent = hasChildren ? (isCollapsed ? '▶' : '▼') : '';
+        toggleButton.innerHTML = hasChildren ? (isCollapsed ? window.IconUtils.getIcon('chevronRight') : window.IconUtils.getIcon('chevronDown')) : '';
         if (!hasChildren) toggleButton.disabled = true;
 
         const iconSpan = document.createElement('span');
         iconSpan.className = 'tree-node-icon';
-        iconSpan.textContent = this.getNodeIcon(node);
+        iconSpan.innerHTML = this.getNodeIcon(node);
 
         const titleLink = document.createElement('a');
         titleLink.href = this.getNotionUrl(node.id);
@@ -673,10 +667,10 @@ class NotionEmbedTree {
 
     getNodeIcon(node) {
         switch (node.type) {
-            case 'database': return '🗃️';
-            case 'page': return '📄';
-            case 'virtual': return '📁'; // For multi-root virtual containers
-            default: return '📄';
+            case 'database': return window.IconUtils.getIcon('database');
+            case 'page': return window.IconUtils.getIcon('file');
+            case 'virtual': return window.IconUtils.getIcon('folder'); // For multi-root virtual containers
+            default: return window.IconUtils.getIcon('file');
         }
     }
 
@@ -763,10 +757,62 @@ class NotionEmbedTree {
 
         const toggleButton = nodeEl.querySelector('.tree-toggle');
         if (toggleButton) {
-            toggleButton.textContent = this.collapsedNodes.has(nodeId) ? '▶' : '▼';
+            toggleButton.innerHTML = this.collapsedNodes.has(nodeId) ? window.IconUtils.getIcon('chevronRight') : window.IconUtils.getIcon('chevronDown');
         }
         
+        this.updateToggleAllButton();
         this.notifyParentOfResize();
+    }
+
+    toggleAllNodes() {
+        const shouldExpand = this.areNodesMostlyCollapsed();
+        
+        if (shouldExpand) {
+            this.expandAllNodes();
+        } else {
+            this.collapseAllNodes();
+        }
+        
+        this.updateToggleAllButton();
+    }
+
+    areNodesMostlyCollapsed() {
+        const nodesWithChildren = document.querySelectorAll('.tree-node .tree-children');
+        if (nodesWithChildren.length === 0) return false;
+        
+        const collapsedCount = this.collapsedNodes.size;
+        const totalCount = nodesWithChildren.length;
+        
+        // Consider "mostly collapsed" if more than half are collapsed
+        return collapsedCount >= totalCount / 2;
+    }
+
+    updateToggleAllButton() {
+        const toggleAllButton = document.getElementById('toggleAllButton');
+        if (!toggleAllButton) return;
+        
+        // Check if there are any nodes with children
+        const nodesWithChildren = document.querySelectorAll('.tree-node .tree-children');
+        
+        // Disable button if no tree or no expandable nodes
+        if (!this.treeData || nodesWithChildren.length === 0) {
+            toggleAllButton.disabled = true;
+            toggleAllButton.innerHTML = window.IconUtils.getIcon('folderOpen');
+            toggleAllButton.title = 'No expandable nodes';
+            return;
+        }
+        
+        // Enable button and update based on state
+        toggleAllButton.disabled = false;
+        const shouldExpand = this.areNodesMostlyCollapsed();
+        
+        if (shouldExpand) {
+            toggleAllButton.innerHTML = window.IconUtils.getIcon('folderOpen');
+            toggleAllButton.title = 'Expand all';
+        } else {
+            toggleAllButton.innerHTML = window.IconUtils.getIcon('folder');
+            toggleAllButton.title = 'Collapse all';
+        }
     }
 
     expandAllNodes() {
@@ -776,9 +822,10 @@ class NotionEmbedTree {
             node.classList.remove('collapsed');
             const toggle = node.querySelector('.tree-toggle:not(.empty)');
             if (toggle) {
-                toggle.textContent = '▼';
+                toggle.innerHTML = window.IconUtils.getIcon('chevronDown');
             }
         });
+        this.updateToggleAllButton();
         this.notifyParentOfResize();
     }
 
@@ -792,10 +839,11 @@ class NotionEmbedTree {
                 node.classList.add('collapsed');
                 const toggle = node.querySelector('.tree-toggle');
                 if (toggle) {
-                    toggle.textContent = '▶';
+                    toggle.innerHTML = window.IconUtils.getIcon('chevronRight');
                 }
             }
         });
+        this.updateToggleAllButton();
         this.notifyParentOfResize();
     }
 
@@ -836,7 +884,20 @@ class NotionEmbedTree {
     }
 }
 
+// Helper function to initialize icons in buttons
+function initializeIcons() {
+    const buttons = document.querySelectorAll('[data-icon]');
+    buttons.forEach(button => {
+        const iconName = button.getAttribute('data-icon');
+        if (iconName && window.IconUtils) {
+            button.innerHTML = window.IconUtils.getIcon(iconName);
+        }
+    });
+}
+
 // Initialize the embed tree when DOM is ready
 document.addEventListener('DOMContentLoaded', () => {
+    // Initialize icons first
+    initializeIcons();
     new NotionEmbedTree();
 });

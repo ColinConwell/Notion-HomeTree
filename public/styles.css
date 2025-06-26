@@ -237,8 +237,23 @@ button:disabled {
     color: #95a5a6;
 }
 
+/* Icon styles */
+[data-icon] {
+    display: inline-flex;
+    align-items: center;
+    margin-right: 8px;
+}
+
+[data-icon] svg {
+    color: currentColor;
+}
+
+.header-icon {
+    margin-right: 12px;
+}
+
 /* Configuration page styles */
-.config-section, .embed-section, .preview-section, .setup-section {
+.config-section, .embed-section, .setup-section {
     background: white;
     padding: 20px;
     border-radius: 12px;
@@ -246,7 +261,7 @@ button:disabled {
     margin-bottom: 20px;
 }
 
-.config-section h2, .embed-section h2, .preview-section h2, .setup-section h2 {
+.config-section h2, .embed-section h2, .setup-section h2 {
     color: #2c3e50;
     margin-bottom: 15px;
     font-size: 1.4rem;
@@ -254,15 +269,21 @@ button:disabled {
 
 .options-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-    gap: 15px;
-    margin-top: 15px;
+    /* grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); */
+    grid-template-columns: repeat(5, max-content);
+    gap: 5px;
+    margin-top: 5px;
+    justify-content: center;
+    justify-items: center;
+    align-content: space-between;
+    align-items: center;
 }
 
 .option-group {
     display: flex;
     flex-direction: column;
     gap: 5px;
+    padding: 10px;
 }
 
 .option-group label {
@@ -290,6 +311,7 @@ button:disabled {
     display: flex;
     flex-direction: column;
     gap: 20px;
+    margin-bottom: 15px;
 }
 
 .url-display {
@@ -327,15 +349,15 @@ button:disabled {
 }
 
 .copy-btn.copied {
-    background: #27ae60;
+    background: #3498db;
 }
 
 .save-btn {
-    background: #27ae60;
+    background: #3498db;
 }
 
 .save-btn:hover:not(:disabled) {
-    background: #219a52;
+    background: #3498db;
 }
 
 .save-btn:disabled {
@@ -344,11 +366,11 @@ button:disabled {
 }
 
 .empty-btn {
-    background: #e67e22;
+    background: #3498db;
 }
 
 .empty-btn:hover {
-    background: #d35400;
+    background: #3498db;
 }
 
 .instructions {
@@ -356,6 +378,7 @@ button:disabled {
     padding: 15px;
     border-radius: 8px;
     border-left: 4px solid #3498db;
+    margin-bottom: 15px;
 }
 
 .instructions h3 {
@@ -382,7 +405,19 @@ button:disabled {
 
 .preview-container {
     position: relative;
-    min-height: 300px;
+    min-height: 400px;
+    height: 60vh;
+    display: flex;
+    flex-direction: column;
+}
+
+#previewFrame {
+    width: 100% !important;
+    height: 100% !important;
+    flex: 1;
+    border: 1px solid #e9ecef !important;
+    border-radius: 8px !important;
+    min-height: 400px;
 }
 
 .preview-placeholder {
