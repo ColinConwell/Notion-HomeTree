@@ -2,7 +2,7 @@
 
 A Notion integration for generating **embeddable** tree-like directory structures that can be added directly to Notion pages as blocks.
 
-## ✨ What This Is
+## What This Is
 
 This creates an **embeddable widget** that you can add to any Notion page (just like adding a table, calendar, or other block). The tree automatically displays the hierarchy of child pages and databases with dynamic configuration capabilities.
 
@@ -14,7 +14,7 @@ This creates an **embeddable widget** that you can add to any Notion page (just 
 - **Smart URL Parsing**: Handles all Notion URL formats including workspace URLs
 - **Default Configuration**: Pre-configure default pages via environment variables
 
-## 🚀 Quick Start
+## Quick Start
 
 ### 1. Setup Server
 
@@ -55,6 +55,50 @@ npm run dev
 3. Press Enter
 4. The tree will appear as an embedded block!
 
+## Default Page Loading
+
+The embed automatically loads default page IDs from your `.env` file when started. This means users can see your tree structure immediately without needing to configure anything.
+
+### How It Works
+
+1. **Configure `.env` file:**
+
+   ```env
+   DEFAULT_PAGE_IDS=abc123def456,def456ghi789
+   ```
+2. **Start the server:**
+
+   ```bash
+   npm run dev
+   ```
+3. **Open embed:** Visit `http://localhost:3000/embed` and the tree will automatically load with your default pages.
+
+### Behavior Summary
+
+| `DEFAULT_PAGE_IDS` Value | Embed Behavior |
+|--------------------------|----------------|
+| Has page IDs (e.g., `abc123,def456`) | Automatically loads tree with specified pages |
+| `mock` | Shows sample tree data for testing |
+| Empty (`DEFAULT_PAGE_IDS=`) | Shows empty state: "No pages configured" with + button |
+| Not specified (omitted) | Shows empty state: "No pages configured" with + button |
+
+### Examples
+
+```env
+# Single page
+DEFAULT_PAGE_IDS=abc123def456
+
+# Multiple pages (comma-separated)
+DEFAULT_PAGE_IDS=abc123def456,def456ghi789,ghi789jkl012
+
+# Use mock data for testing
+DEFAULT_PAGE_IDS=mock
+
+# Empty - shows "No pages configured" with + button
+DEFAULT_PAGE_IDS=
+# OR simply omit the line entirely
+```
+
 ## Setup + Installation
 
 1. **Install dependencies:**
@@ -78,8 +122,10 @@ npm run dev
 4. **Configure defaults (optional):**
 
    ```env
-   # Add to .env file for default pages
+   # Add to .env file for default pages that load automatically
    DEFAULT_PAGE_IDS=page1,page2,page3
+   # Or use 'mock' for testing
+   DEFAULT_PAGE_IDS=mock
    ```
 5. **Run the application:**
 
@@ -302,17 +348,19 @@ MAX_DEPTH_DEFAULT=3                 # Default tree depth limit
 
 ```
 src/
-├── notion-client.js    # Notion API integration
+├── notion-client.js   # Notion API integration
 └── server.js          # Express server
 
 public/
 ├── index.html         # Main config interface
+├── styles.css         # Main page styling
+├── icons.js           # SVG icon templates
 ├── embed.html         # Embeddable widget
-├── styles.css         # Config page styling
-├── embed.css   # Widget styling
-├── config.js          # Configuration logic
-└── embed.js # Tree widget functionality
+├── embed.css          # Embeddable widget styling
+├── embed.js           # Embedable widget logic
+├── docs.html          # Documentation page
+├── config.js          # Configuration page logic
+└── tree-component.js  # Tree widget functionality
 
 test.html              # Testing interface
-test-setup.md          # Testing documentation
 ```
