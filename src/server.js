@@ -509,10 +509,10 @@ app.get('/config', (req, res) => {
 
 app.listen(PORT, () => {
   console.log(`🚀 Notion HomeTree server running on port ${PORT}`);
-  console.log(`🏠 Home embed: http://localhost:${PORT}`);
-  console.log(`📝 Config page: http://localhost:${PORT}/config`);
-  console.log(`📚 Documentation: http://localhost:${PORT}/docs`);
-  console.log(`🧪 Test page: http://localhost:${PORT}/test`);
-  console.log(`🔗 Sample embed: http://localhost:${PORT}/embed?pageId=mock`);
-  console.log(`💡 Health check: http://localhost:${PORT}/health`);
+  console.log(`Default embed: http://localhost:${PORT}`);
+  console.log(`Config page: http://localhost:${PORT}/config`);
+  console.log(`Documentation: http://localhost:${PORT}/docs`);
+  console.log(`Test page: http://localhost:${PORT}/test`);
+  console.log(`Sample embed: http://localhost:${PORT}/embed?pageId=mock`);
+  console.log(`Health check: http://localhost:${PORT}/health`);
 });
