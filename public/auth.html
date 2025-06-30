@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Authentication Required - Notion HomeTree</title>
+    <link rel="stylesheet" href="embed.css">
+    <style>
+        .auth-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            background: #f8f9fa;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+        }
+        .auth-card {
+            background: white;
+            padding: 40px;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+            max-width: 400px;
+            width: 100%;
+            text-align: center;
+        }
+        .auth-title {
+            color: #2c3e50;
+            margin-bottom: 10px;
+            font-size: 24px;
+        }
+        .auth-subtitle {
+            color: #7f8c8d;
+            margin-bottom: 30px;
+            font-size: 14px;
+        }
+        .auth-input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            font-size: 16px;
+            margin-bottom: 20px;
+            box-sizing: border-box;
+        }
+        .auth-input:focus {
+            outline: none;
+            border-color: #3498db;
+        }
+        .auth-button {
+            width: 100%;
+            padding: 12px;
+            background: #3498db;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        .auth-button:hover {
+            background: #2980b9;
+        }
+        .auth-button:disabled {
+            background: #bdc3c7;
+            cursor: not-allowed;
+        }
+        .auth-error {
+            color: #e74c3c;
+            font-size: 14px;
+            margin-top: 10px;
+            display: none;
+        }
+        .auth-icon {
+            font-size: 48px;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="auth-container">
+        <div class="auth-card">
+            <div class="auth-icon">🔐</div>
+            <h1 class="auth-title">Authentication Required</h1>
+            <p class="auth-subtitle">Please enter your Notion API token to access this tree</p>
+            
+            <form id="authForm">
+                <input 
+                    type="password" 
+                    id="tokenInput" 
+                    class="auth-input" 
+                    placeholder="Enter your Notion API token"
+                    required
+                >
+                <button type="submit" id="authButton" class="auth-button">
+                    Access Tree
+                </button>
+                <div id="authError" class="auth-error"></div>
+            </form>
+        </div>
+    </div>
+    
+    <script>
+        document.getElementById('authForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const token = document.getElementById('tokenInput').value.trim();
+            const button = document.getElementById('authButton');
+            const error = document.getElementById('authError');
+            
+            if (!token) {
+                error.textContent = 'Please enter a token';
+                error.style.display = 'block';
+                return;
+            }
+            
+            button.disabled = true;
+            button.textContent = 'Verifying...';
+            error.style.display = 'none';
+            
+            try {
+                const response = await fetch('/api/verify-key', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ apiKey: token })
+                });
+                
+                const result = await response.json();
+                
+                if (result.valid) {
+                    // Redirect to the same URL but with token parameter
+                    const url = new URL(window.location);
+                    url.searchParams.set('token', token);
+                    window.location.href = url.toString();
+                } else {
+                    error.textContent = 'Invalid token. Please check your Notion API key.';
+                    error.style.display = 'block';
+                }
+            } catch (err) {
+                error.textContent = 'Authentication failed. Please try again.';
+                error.style.display = 'block';
+            }
+            
+            button.disabled = false;
+            button.textContent = 'Access Tree';
+        });
+        
+        // Auto-focus the input
+        document.getElementById('tokenInput').focus();
+    </script>
+</body>
+</html> 
