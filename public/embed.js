@@ -698,14 +698,35 @@ class NotionEmbedTree {
             if (!titleEl || !contentEl) return;
 
             const originalTitle = titleEl.textContent;
-            const matches = this.searchTerm && 
-                originalTitle.toLowerCase().includes(this.searchTerm.toLowerCase());
+            // Find the node in the tree data by ID
+            const findNodeById = (node, id) => {
+                if (node.id === id) return node;
+                if (node.children) {
+                    for (const child of node.children) {
+                        const found = findNodeById(child, id);
+                        if (found) return found;
+                    }
+                }
+                return null;
+            };
+            const nodeData = findNodeById(this.treeData, nodeId);
+            const contentText = nodeData && nodeData.content ? nodeData.content : '';
+
+            const matches = this.searchTerm && (
+                originalTitle.toLowerCase().includes(this.searchTerm.toLowerCase()) ||
+                contentText.toLowerCase().includes(this.searchTerm.toLowerCase())
+            );
 
             // Always show nodes in compact embed, just highlight matches
             if (this.searchTerm) {
                 if (matches) {
                     contentEl.classList.add('highlighted');
-                    titleEl.innerHTML = this.highlightText(originalTitle, this.searchTerm);
+                    // Highlight in title if match
+                    if (originalTitle.toLowerCase().includes(this.searchTerm.toLowerCase())) {
+                        titleEl.innerHTML = this.highlightText(originalTitle, this.searchTerm);
+                    } else {
+                        titleEl.innerHTML = this.escapeHtml(originalTitle);
+                    }
                 } else {
                     contentEl.classList.remove('highlighted');
                     titleEl.innerHTML = this.escapeHtml(originalTitle);

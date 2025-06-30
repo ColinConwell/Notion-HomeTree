@@ -117,6 +117,15 @@ app.get('/api/config/defaults', (req, res) => {
   });
 });
 
+// Helper to normalize Notion page IDs (remove hyphens, ensure 32 hex chars)
+function normalizePageId(id) {
+  if (!id) return null;
+  // Remove hyphens
+  const clean = id.replace(/-/g, '');
+  // Only return if 32 hex chars
+  return /^[a-f0-9]{32}$/i.test(clean) ? clean : null;
+}
+
 // API endpoints
 app.get('/api/tree/:pageId', async (req, res) => {
   try {
@@ -125,10 +134,14 @@ app.get('/api/tree/:pageId', async (req, res) => {
     
     // Handle multiple page IDs (comma-separated)
     const pageIds = pageId.includes(',') ? pageId.split(',') : [pageId];
+    const normalizedPageIds = pageIds.map(id => normalizePageId(id.trim())).filter(Boolean);
+    if (normalizedPageIds.length === 0) {
+      return res.status(400).json({ error: 'Invalid page ID(s) provided.' });
+    }
     
     // Return mock data for testing
-    if (pageIds.includes('mock') || pageIds.includes('sample')) {
-      if (pageIds.length === 1) {
+    if (normalizedPageIds.includes('mock') || normalizedPageIds.includes('sample')) {
+      if (normalizedPageIds.length === 1) {
         res.json(mockTreeData);
         return;
       }
@@ -143,9 +156,9 @@ app.get('/api/tree/:pageId', async (req, res) => {
       return;
     }
     
-    if (pageIds.length === 1) {
+    if (normalizedPageIds.length === 1) {
       // Single page - existing logic
-      const cacheKey = `tree:${pageId}:${maxDepth}`;
+      const cacheKey = `tree:${normalizedPageIds[0]}:${maxDepth}`;
       
       // Check cache first (unless cache busting is requested)
       if (!_cb) {
@@ -165,7 +178,7 @@ app.get('/api/tree/:pageId', async (req, res) => {
       }
       
       // Fetch fresh data
-      const tree = await notionClient.getPageTree(pageId, parseInt(maxDepth));
+      const tree = await notionClient.getPageTree(normalizedPageIds[0], parseInt(maxDepth));
       
       // Cache the result
       cache.set(cacheKey, tree);
@@ -173,7 +186,7 @@ app.get('/api/tree/:pageId', async (req, res) => {
       res.json(tree);
     } else {
       // Multiple pages - create virtual root
-      const cacheKey = `multi-tree:${pageIds.join(',')}:${maxDepth}`;
+      const cacheKey = `multi-tree:${normalizedPageIds.join(',')}:${maxDepth}`;
       
       // Check cache first (unless cache busting is requested)
       if (!_cb) {
@@ -193,8 +206,8 @@ app.get('/api/tree/:pageId', async (req, res) => {
       }
       
       // Fetch all trees in parallel
-      const treePromises = pageIds.map(id => 
-        notionClient.getPageTree(id.trim(), parseInt(maxDepth))
+      const treePromises = normalizedPageIds.map(id => 
+        notionClient.getPageTree(id, parseInt(maxDepth))
       );
       
       const trees = await Promise.all(treePromises);

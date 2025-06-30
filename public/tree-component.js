@@ -175,7 +175,23 @@ class NotionTreeComponent {
             if (!titleEl || !contentEl) return;
 
             const originalTitle = titleEl.textContent;
-            const matches = this.searchTerm && originalTitle.toLowerCase().includes(this.searchTerm.toLowerCase());
+            const findNodeById = (node, id) => {
+                if (node.id === id) return node;
+                if (node.children) {
+                    for (const child of node.children) {
+                        const found = findNodeById(child, id);
+                        if (found) return found;
+                    }
+                }
+                return null;
+            };
+            const nodeData = findNodeById(this.treeData, nodeId);
+            const contentText = nodeData && nodeData.content ? nodeData.content : '';
+
+            const matches = this.searchTerm && (
+                originalTitle.toLowerCase().includes(this.searchTerm.toLowerCase()) ||
+                contentText.toLowerCase().includes(this.searchTerm.toLowerCase())
+            );
 
             if (this.searchMode === 'filter') {
                 if (this.searchTerm && !matches && !this.hasMatchingDescendant(nodeId)) {
@@ -191,7 +207,11 @@ class NotionTreeComponent {
                 
                 if (matches) {
                     contentEl.classList.add('highlighted');
-                    titleEl.innerHTML = this.highlightText(originalTitle, this.searchTerm);
+                    if (originalTitle.toLowerCase().includes(this.searchTerm.toLowerCase())) {
+                        titleEl.innerHTML = this.highlightText(originalTitle, this.searchTerm);
+                    } else {
+                        titleEl.innerHTML = this.escapeHtml(originalTitle);
+                    }
                 } else {
                     contentEl.classList.remove('highlighted');
                     titleEl.innerHTML = this.escapeHtml(originalTitle);
@@ -217,7 +237,11 @@ class NotionTreeComponent {
         const checkDescendants = (node) => {
             if (node.children) {
                 for (const child of node.children) {
-                    if (child.title.toLowerCase().includes(this.searchTerm.toLowerCase())) {
+                    const contentText = child.content || '';
+                    if (
+                        child.title.toLowerCase().includes(this.searchTerm.toLowerCase()) ||
+                        contentText.toLowerCase().includes(this.searchTerm.toLowerCase())
+                    ) {
                         return true;
                     }
                     if (checkDescendants(child)) {
