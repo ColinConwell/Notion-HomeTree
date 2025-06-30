@@ -43,18 +43,44 @@ class NotionTreeComponent {
     extractPageId(input) {
         if (!input) return null;
         
-        const urlPattern = /notion\.so\/([a-f0-9]{32})/i;
+        // Extract from full Notion URL with workspace prefix and query params
+        // Matches: https://www.notion.so/workspace/Page-Title-199d606e3bdf8009975adb93ae6a52a7?source=copy_link
+        const urlPatternWithWorkspace = /notion\.so\/[^\/]+\/[^\/]*-([a-f0-9]{32})(?:\?.*)?$/i;
+        const workspaceMatch = input.match(urlPatternWithWorkspace);
+        if (workspaceMatch) {
+            return workspaceMatch[1];
+        }
+        
+        // Extract from simple notion.so URL
+        // Matches: https://www.notion.so/199d606e3bdf8009975adb93ae6a52a7
+        const urlPattern = /notion\.so\/([a-f0-9]{32})(?:\?.*)?$/i;
         const match = input.match(urlPattern);
         if (match) {
             return match[1];
         }
         
+        // Extract from URL with title and ID (no workspace)
+        // Matches: https://www.notion.so/Page-Title-199d606e3bdf8009975adb93ae6a52a7
+        const titlePattern = /notion\.so\/[^\/]*-([a-f0-9]{32})(?:\?.*)?$/i;
+        const titleMatch = input.match(titlePattern);
+        if (titleMatch) {
+            return titleMatch[1];
+        }
+        
+        // Extract from dashed UUID format
+        const dashedPattern = /([a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12})/i;
+        const dashedMatch = input.match(dashedPattern);
+        if (dashedMatch) {
+            return dashedMatch[1].replace(/-/g, '');
+        }
+        
+        // Clean ID (remove any non-hex characters)
         const cleanId = input.replace(/[^a-f0-9]/gi, '');
         if (cleanId.length === 32) {
             return cleanId;
         }
         
-        return input;
+        return null; // Return null instead of input for invalid IDs
     }
 
     async loadTree() {
@@ -136,6 +162,8 @@ class NotionTreeComponent {
         const icon = node.type === 'database' ? window.IconUtils.getIcon('database') : window.IconUtils.getIcon('file');
         const toggleIcon = hasChildren ? (isCollapsed ? window.IconUtils.getIcon('chevronRight') : window.IconUtils.getIcon('chevronDown')) : '';
         
+        // Use the actual URL from the API if available, otherwise fallback to constructed URL
+        const notionUrl = node.url || this.getNotionUrl(node.id);
         let html = `
             <div class="tree-node ${isCollapsed ? 'collapsed' : ''}" data-id="${node.id}">
                 <div class="tree-node-content" style="padding-left: ${level * 20}px">
@@ -145,7 +173,7 @@ class NotionTreeComponent {
                         ${toggleIcon}
                     </button>
                     <span class="tree-node-icon">${icon}</span>
-                    <span class="tree-node-title">${this.escapeHtml(node.title)}</span>
+                    <a href="${notionUrl}" target="_blank" class="tree-node-title tree-node-link">${this.escapeHtml(node.title)}</a>
                 </div>
         `;
 
@@ -159,6 +187,20 @@ class NotionTreeComponent {
 
         html += '</div>';
         return html;
+    }
+
+    getNotionUrl(pageId) {
+        if (pageId === 'multi-root' || !pageId || pageId.includes('virtual')) {
+            return '#';
+        }
+        // Ensure pageId is 32 characters without dashes
+        const cleanId = pageId.replace(/-/g, '');
+        if (cleanId.length !== 32) {
+            console.warn(`Invalid page ID length: ${pageId}`);
+            return '#';
+        }
+        const formattedId = cleanId.replace(/(.{8})(.{4})(.{4})(.{4})(.{12})/, '$1-$2-$3-$4-$5');
+        return `https://www.notion.so/${formattedId}`;
     }
 
     updateTreeDisplay() {

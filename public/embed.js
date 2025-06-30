@@ -305,6 +305,7 @@ class NotionEmbedTree {
         if (!input) return null;
         
         // Extract from full Notion URL with workspace prefix and query params
+        // Matches: https://www.notion.so/workspace/Page-Title-199d606e3bdf8009975adb93ae6a52a7?source=copy_link
         const urlPatternWithWorkspace = /notion\.so\/[^\/]+\/[^\/]*-([a-f0-9]{32})(?:\?.*)?$/i;
         const workspaceMatch = input.match(urlPatternWithWorkspace);
         if (workspaceMatch) {
@@ -312,17 +313,26 @@ class NotionEmbedTree {
         }
         
         // Extract from simple notion.so URL
+        // Matches: https://www.notion.so/199d606e3bdf8009975adb93ae6a52a7
         const urlPattern = /notion\.so\/([a-f0-9]{32})(?:\?.*)?$/i;
         const urlMatch = input.match(urlPattern);
         if (urlMatch) {
             return urlMatch[1];
         }
         
-        // Extract from URL with title and ID
+        // Extract from URL with title and ID (no workspace)
+        // Matches: https://www.notion.so/Page-Title-199d606e3bdf8009975adb93ae6a52a7
         const titlePattern = /notion\.so\/[^\/]*-([a-f0-9]{32})(?:\?.*)?$/i;
         const titleMatch = input.match(titlePattern);
         if (titleMatch) {
             return titleMatch[1];
+        }
+        
+        // Extract from dashed UUID format
+        const dashedPattern = /([a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12})/i;
+        const dashedMatch = input.match(dashedPattern);
+        if (dashedMatch) {
+            return dashedMatch[1].replace(/-/g, '');
         }
         
         // Check if it's already a clean page ID (32 hex chars)
@@ -600,7 +610,7 @@ class NotionEmbedTree {
                         ${toggleIcon}
                     </button>
                     <span class="tree-node-icon">${icon}</span>
-                    <a href="${this.getNotionUrl(node.id)}" target="_blank" class="tree-node-title tree-node-link">${this.escapeHtml(node.title)}</a>
+                    <a href="${node.url || this.getNotionUrl(node.id)}" target="_blank" class="tree-node-title tree-node-link">${this.escapeHtml(node.title)}</a>
                 </div>
         `;
 
@@ -639,7 +649,7 @@ class NotionEmbedTree {
         iconSpan.innerHTML = this.getNodeIcon(node);
 
         const titleLink = document.createElement('a');
-        titleLink.href = this.getNotionUrl(node.id);
+        titleLink.href = node.url || this.getNotionUrl(node.id);
         titleLink.target = '_blank';
         titleLink.className = 'tree-node-title tree-node-link';
         titleLink.textContent = node.title;
@@ -679,8 +689,14 @@ class NotionEmbedTree {
         if (pageId === 'multi-root' || !pageId || pageId.includes('virtual')) {
             return '#';
         }
+        // Ensure pageId is 32 characters without dashes
+        const cleanId = pageId.replace(/-/g, '');
+        if (cleanId.length !== 32) {
+            console.warn(`Invalid page ID length: ${pageId}`);
+            return '#';
+        }
         // Format page ID for Notion URL (add hyphens)
-        const formattedId = pageId.replace(/(.{8})(.{4})(.{4})(.{4})(.{12})/, '$1-$2-$3-$4-$5');
+        const formattedId = cleanId.replace(/(.{8})(.{4})(.{4})(.{4})(.{12})/, '$1-$2-$3-$4-$5');
         return `https://www.notion.so/${formattedId}`;
     }
 

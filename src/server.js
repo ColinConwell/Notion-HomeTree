@@ -206,11 +206,13 @@ app.get('/api/tree/:pageId', async (req, res) => {
       }
       
       // Fetch all trees in parallel
-      const treePromises = normalizedPageIds.map(id => 
-        notionClient.getPageTree(id, parseInt(maxDepth))
-      );
+      const treePromises = normalizedPageIds.map(id => {
+        console.log(`Fetching tree for page ID: ${id}`);
+        return notionClient.getPageTree(id, parseInt(maxDepth));
+      });
       
       const trees = await Promise.all(treePromises);
+      console.log(`Successfully fetched ${trees.length} trees`);
       
       // Create virtual root containing all trees
       const multiTree = {

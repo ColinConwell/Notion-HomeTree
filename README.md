@@ -6,14 +6,6 @@ A Notion integration for generating **embeddable** tree-like directory structure
 
 This creates an **embeddable widget** that you can add to any Notion page (just like adding a table, calendar, or other block). The tree automatically displays the hierarchy of child pages and databases with dynamic configuration capabilities.
 
-### 🆕 **Dynamic Configuration Features**
-
-- **Empty State Initialization**: Start with no pages and build your tree dynamically
-- **+ Add Page Button**: Click to add new Notion pages to your tree on-the-fly
-- **Multi-Page Support**: Display multiple page hierarchies in a single tree
-- **Smart URL Parsing**: Handles all Notion URL formats including workspace URLs
-- **Default Configuration**: Pre-configure default pages via environment variables
-
 ## Quick Start
 
 ### 1. Setup Server

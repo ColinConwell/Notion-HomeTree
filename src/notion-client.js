@@ -10,11 +10,15 @@ class NotionTreeClient {
       const page = await this.notion.pages.retrieve({ page_id: pageId });
       const children = maxDepth > 0 ? await this.getPageChildren(pageId, maxDepth - 1) : [];
       const content = await this.getPagePlainText(pageId);
+      
+      console.log(`Page ${pageId} URL from API: ${page.url}`);
+      
       return {
         id: pageId,
         title: this.extractTitle(page),
         type: 'page',
         content: content,
+        url: page.url,
         children: children
       };
     } catch (error) {
@@ -38,12 +42,14 @@ class NotionTreeClient {
           children.push(childTree);
         } else if (block.type === 'child_page') {
           // Add page without children when at max depth
+          const childPage = await this.notion.pages.retrieve({ page_id: block.id });
           const content = await this.getPagePlainText(block.id);
           children.push({
             id: block.id,
             title: block.child_page?.title || 'Untitled',
             type: 'page',
             content: content,
+            url: childPage.url,
             children: []
           });
         } else if (block.type === 'child_database') {
@@ -55,6 +61,7 @@ class NotionTreeClient {
             title: this.extractTitle(database),
             type: 'database',
             content: '',
+            url: database.url,
             children: []
           });
         }
@@ -105,7 +112,8 @@ class NotionTreeClient {
         id: page.id,
         title: this.extractTitle(page),
         type: 'page',
-        url: page.url
+        url: page.url, // Include the actual URL from Notion API
+        content: '' // Add empty content for consistency
       }));
     } catch (error) {
       console.error('Error searching pages:', error);
