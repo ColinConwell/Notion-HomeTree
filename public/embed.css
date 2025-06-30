@@ -48,6 +48,13 @@ html, body {
     gap: 4px;
 }
 
+.toolbar-center {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex: 1;
+}
+
 .search-container {
     display: flex;
     align-items: center;
@@ -70,7 +77,7 @@ html, body {
     outline: none;
     padding: 4px 6px;
     font-family: inherit;
-    width: 120px;
+    width: 200px;
 }
 
 .search-input::placeholder {
@@ -384,7 +391,7 @@ body.compact .search-container {
 }
 
 body.compact .search-input {
-    width: 100px;
+    width: 180px;
     padding: 2px 4px;
     font-size: 11px;
 }
