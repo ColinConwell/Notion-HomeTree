@@ -673,3 +673,30 @@ button:disabled {
     font-size: 12px;
     color: #95a5a6;
 }
+
+/* Authentication Options */
+.auth-options {
+    margin-top: 15px;
+}
+
+.auth-status {
+    border-radius: 6px;
+    padding: 12px;
+    margin-top: 10px;
+    font-size: 14px;
+    line-height: 1.4;
+}
+
+.auth-status strong {
+    font-weight: 600;
+}
+
+#includeToken:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+#includeToken:disabled + label {
+    opacity: 0.5;
+    cursor: not-allowed;
+}

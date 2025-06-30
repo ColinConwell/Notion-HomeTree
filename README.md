@@ -106,6 +106,7 @@ DEFAULT_PAGE_IDS=
      ```
      NOTION_API_KEY=your_notion_integration_token_here
      PORT=3000
+     REQUIRE_TOKEN=true
      ```
 3. **Share your Notion page:**
 
@@ -154,7 +155,58 @@ DEFAULT_PAGE_IDS=
 - `POST /api/cache/clear/:pageId?` - Clear cache for specific page or all cache
 - `GET /health` - Server health check and available endpoints
 
-## 🌐 Hosting & Deployment
+## Security + Authentication
+
+This application includes optional authentication to protect access to your Notion data. Authentication can be enabled or disabled via environment configuration.
+
+### Authentication Methods
+
+**URL Parameter Authentication:**
+```
+https://your-domain.com/?token=your_notion_api_key
+https://your-domain.com/embed?pageId=abc123&token=your_notion_api_key
+```
+
+**Interactive Authentication:**
+- Visit the protected URL without a token parameter
+- Enter your Notion API key in the authentication prompt
+- Access is granted after successful validation
+
+### Configuration
+
+Control authentication requirements with the `REQUIRE_TOKEN` environment variable:
+
+```env
+# Enable authentication (default)
+REQUIRE_TOKEN=true
+
+# Disable authentication - open access
+REQUIRE_TOKEN=false
+```
+
+### Protected Routes
+
+When `REQUIRE_TOKEN=true`, these routes require authentication:
+- `/` - Main configuration interface
+- `/embed` - Embeddable tree widget
+
+### Unprotected Routes
+
+These routes are always accessible regardless of authentication settings:
+- `/config` - Configuration page (used for generating embed URLs)
+- `/docs` - Documentation
+- `/test` - Testing interface
+- `/health` - Health check
+- All static assets (`/public/*`)
+
+### Security Notes
+
+- API tokens are validated against your server's `NOTION_API_KEY`
+- Tokens are not stored persistently - authentication is per-session
+- The config page remains open to allow embed URL generation
+- Use HTTPS in production to protect token transmission
+
+## Hosting & Deployment
 
 ### Railway (Recommended)
 
@@ -278,7 +330,8 @@ PORT=3000                           # Server port (auto-set by most platforms)
 DEFAULT_PAGE_IDS=page1,page2,page3  # Default pages for empty embeds
 CACHE_TTL=300                       # Cache duration in seconds
 AUTO_REFRESH_DEFAULT=0              # Default auto-refresh rate
-MAX_DEPTH_DEFAULT=3                 # Default tree depth limit
+MAX_DEPTH_DEFAULT=3                 # Default max tree depth limit
+REQUIRE_TOKEN=true                  # Enable/disable authentication (default: true)
 ```
 
 ### Post-Deployment
@@ -300,13 +353,13 @@ MAX_DEPTH_DEFAULT=3                 # Default tree depth limit
 
 ### Quick Test (No Notion API Required)
 
-1. Start server: `npm run dev`
+1. Start server with command: `npm run dev`
 2. Visit: http://localhost:3000/test
 3. Click "Load Mock Data" to see the tree in action
 
 ### Test Pages Available:
 
-- **Config UI**: http://localhost:3000
+- **Config UI**: http://localhost:3000/config
 - **Test Page**: http://localhost:3000/test (comprehensive testing interface)
 - **Documentation**: http://localhost:3000/docs
 - **Sample Embed**: http://localhost:3000/embed?pageId=mock

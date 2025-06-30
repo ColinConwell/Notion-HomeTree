@@ -117,6 +117,14 @@ app.get('/api/config/defaults', (req, res) => {
   });
 });
 
+// Get server configuration (including authentication requirements)
+app.get('/api/config/server', (req, res) => {
+  res.json({
+    requireToken: process.env.REQUIRE_TOKEN !== 'false',
+    hasApiKey: !!process.env.NOTION_API_KEY
+  });
+});
+
 // Helper to normalize Notion page IDs (remove hyphens, ensure 32 hex chars)
 function normalizePageId(id) {
   if (!id) return null;
@@ -315,6 +323,14 @@ function verifyApiKey(apiKey) {
 
 // Middleware to check authentication for protected routes
 function requireAuth(req, res, next) {
+  // Check if authentication is disabled
+  const requireToken = process.env.REQUIRE_TOKEN !== 'false';
+  
+  if (!requireToken) {
+    // Authentication disabled - allow all requests
+    return next();
+  }
+  
   // Check if this is a request from the config page preview container
   const referer = req.get('referer');
   const isConfigPreview = referer && referer.includes('/config');

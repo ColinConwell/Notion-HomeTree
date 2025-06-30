@@ -3,13 +3,15 @@ class NotionTreeConfig {
         this.userApiKey = '';
         this.savedEmbeds = [];
         this.savedPages = [];
+        this.serverConfig = { requireToken: true, hasApiKey: false };
         this.initializeEventListeners();
+        this.loadServerConfig();
         this.updateEmbedUrl();
         this.setupApiKeyHandling();
     }
 
     initializeEventListeners() {
-        const inputs = ['pageId', 'multiPageIds', 'maxDepth', 'compact', 'showSearch', 'autoExpand', 'autoRefresh'];
+        const inputs = ['pageId', 'multiPageIds', 'maxDepth', 'compact', 'showSearch', 'autoExpand', 'autoRefresh', 'includeToken'];
         
         inputs.forEach(id => {
             const element = document.getElementById(id);
@@ -56,6 +58,56 @@ class NotionTreeConfig {
         }
         
         return null; // Return null instead of input.trim() for invalid IDs
+    }
+
+    async loadServerConfig() {
+        try {
+            const response = await fetch('/api/config/server');
+            if (response.ok) {
+                this.serverConfig = await response.json();
+                this.updateAuthenticationUI();
+            }
+        } catch (error) {
+            console.error('Failed to load server config:', error);
+        }
+    }
+
+    updateAuthenticationUI() {
+        const authSection = document.getElementById('authSection');
+        const authStatus = document.getElementById('authStatus');
+        
+        if (this.serverConfig.requireToken) {
+            authSection.style.display = 'block';
+            
+            if (this.serverConfig.hasApiKey) {
+                authStatus.innerHTML = `
+                    <span style="color: #27ae60;">🔐 Authentication is enabled</span><br>
+                    <small>Embed URLs will require token validation when accessed directly.</small>
+                `;
+                authStatus.style.background = '#d5f4e6';
+                authStatus.style.border = '1px solid #27ae60';
+            } else {
+                authStatus.innerHTML = `
+                    <span style="color: #e74c3c;">⚠️ Server API key not configured</span><br>
+                    <small>Authentication is enabled but server has no API key set.</small>
+                `;
+                authStatus.style.background = '#ffeaea';
+                authStatus.style.border = '1px solid #e74c3c';
+            }
+        } else {
+            authSection.style.display = 'block';
+            authStatus.innerHTML = `
+                <span style="color: #f39c12;">🔓 Authentication is disabled</span><br>
+                <small>Embed URLs can be accessed without authentication.</small>
+            `;
+            authStatus.style.background = '#fef9e7';
+            authStatus.style.border = '1px solid #f39c12';
+            
+            // Disable the include token checkbox when auth is disabled
+            const includeTokenCheckbox = document.getElementById('includeToken');
+            includeTokenCheckbox.disabled = true;
+            includeTokenCheckbox.checked = false;
+        }
     }
 
     updateEmbedUrl() {
@@ -123,6 +175,12 @@ class NotionTreeConfig {
             params.set('autoRefresh', autoRefresh.toString());
         }
 
+        // Add authentication token if requested and available
+        const includeToken = document.getElementById('includeToken').checked;
+        if (includeToken && this.userApiKey && this.serverConfig.requireToken) {
+            params.set('token', this.userApiKey);
+        }
+
         const baseUrl = window.location.origin;
         const embedUrl = `${baseUrl}/embed?${params.toString()}`;
         
@@ -135,7 +193,7 @@ class NotionTreeConfig {
         copyBtn.disabled = false;
         saveBtn.disabled = !this.userApiKey;
         
-        // Update preview
+        // Update preview (always include token for preview if available)
         this.updatePreview(embedUrl);
     }
 
@@ -369,7 +427,9 @@ class NotionTreeConfig {
         const embed = this.savedEmbeds.find(e => e.id === embedId);
         if (!embed) return;
         
-        const embedUrl = this.buildEmbedUrl(embed.config, embed.pageIds);
+        // Check if user wants token included (use current setting)
+        const includeToken = document.getElementById('includeToken').checked;
+        const embedUrl = this.buildEmbedUrl(embed.config, embed.pageIds, includeToken);
         
         try {
             await navigator.clipboard.writeText(embedUrl);
@@ -394,8 +454,8 @@ class NotionTreeConfig {
             }
         });
         
-        // Add token for preview if available and requested
-        if (includeToken && this.userApiKey) {
+        // Add token if available and requested (or for preview)
+        if (includeToken && this.userApiKey && this.serverConfig.requireToken) {
             params.set('token', this.userApiKey);
         }
         

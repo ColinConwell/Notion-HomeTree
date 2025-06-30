@@ -93,6 +93,25 @@
                         </label>
                     </div>
                 </div>
+                
+                <!-- Authentication Options -->
+                <div class="config-section" id="authSection" style="display: none;">
+                    <h3><span data-icon="shield"></span> Authentication Options</h3>
+                    <div class="auth-options">
+                        <div class="option-group">
+                            <label>
+                                <input type="checkbox" id="includeToken"> Include authentication token in URL
+                            </label>
+                            <small style="color: #666; margin-top: 4px; display: block;">
+                                Automatically includes your API token for direct access without login prompt.
+                                <strong>Only use for private/secure environments.</strong>
+                            </small>
+                        </div>
+                        <div class="auth-status" id="authStatus" style="margin-top: 10px; padding: 10px; border-radius: 4px; font-size: 14px;">
+                            <!-- Authentication status will be shown here -->
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
         
@@ -139,12 +158,15 @@
                 </ol>
                 
                 <div style="background: #fff3cd; border: 1px solid #ffeaa7; border-radius: 6px; padding: 15px; margin-top: 15px;">
-                    <h4 style="margin: 0 0 10px 0; color: #856404;">🔐 Authentication Required</h4>
-                    <p style="margin: 0; color: #856404; font-size: 14px;">
-                        <strong>Direct Access:</strong> When accessing embed URLs directly (not within Notion), 
-                        you'll be prompted to enter your Notion API token for security. 
-                        You can also add <code>?token=your_api_key</code> to the URL to bypass the prompt.
+                    <h4 style="margin: 0 0 10px 0; color: #856404;">🔐 Authentication & Security</h4>
+                    <p style="margin: 0 0 10px 0; color: #856404; font-size: 14px;">
+                        <strong>Authentication Options:</strong> Use the "Authentication Options" section above to control how your embed URLs handle authentication:
                     </p>
+                    <ul style="margin: 0; color: #856404; font-size: 14px; padding-left: 20px;">
+                        <li><strong>Include Token:</strong> Embeds tokens in URLs for direct access (use only in secure environments)</li>
+                        <li><strong>Require Login:</strong> Users will be prompted to enter API key when accessing embed directly</li>
+                        <li><strong>Notion Integration:</strong> Embeds work seamlessly within Notion pages regardless of settings</li>
+                    </ul>
                 </div>
             </div>
         </div>
