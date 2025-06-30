@@ -153,6 +153,12 @@ class NotionTreeConfig {
         const previewFrame = document.getElementById('previewFrame');
         const placeholder = document.getElementById('previewPlaceholder');
         
+        // Add token to preview URL if we have an API key
+        if (this.userApiKey && !embedUrl.includes('token=')) {
+            const separator = embedUrl.includes('?') ? '&' : '?';
+            embedUrl += `${separator}token=${encodeURIComponent(this.userApiKey)}`;
+        }
+        
         previewFrame.src = embedUrl;
         previewFrame.style.display = 'block';
         placeholder.style.display = 'none';
@@ -373,7 +379,7 @@ class NotionTreeConfig {
         }
     }
 
-    buildEmbedUrl(config, pageIds) {
+    buildEmbedUrl(config, pageIds, includeToken = false) {
         const params = new URLSearchParams();
         
         if (pageIds.length === 1) {
@@ -387,6 +393,11 @@ class NotionTreeConfig {
                 params.set(key, value);
             }
         });
+        
+        // Add token for preview if available and requested
+        if (includeToken && this.userApiKey) {
+            params.set('token', this.userApiKey);
+        }
         
         return `${window.location.origin}/embed?${params.toString()}`;
     }
